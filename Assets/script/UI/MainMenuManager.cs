@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.Audio;
+using UnityEngine.EventSystems;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -31,6 +32,14 @@ public class MainMenuManager : MonoBehaviour
     [Header("Settings — Display")]
     public Toggle fullscreenToggle;        // (Optional) Drag fullscreen Toggle here
     public Dropdown resolutionDropdown;    // (Optional) Drag resolution Dropdown here
+
+    [Header("Button Effects (Animation & Sound)")]
+    public float hoverScaleSize = 1.1f;
+    public float animationSpeed = 10f;
+    public Color hoverFadeColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+    public AudioSource sfxSource;
+    public AudioClip hoverSFX;
+    public AudioClip clickSFX;
 
     // ─────────────────────────────────────────────────────────
     // Private fields
@@ -70,6 +79,9 @@ public class MainMenuManager : MonoBehaviour
 
         // ── Setup resolution dropdown ──
         SetupResolutionDropdown();
+
+        // ── Setup Button Effects ──
+        SetupButtonEffects();
     }
 
     // ═════════════════════════════════════════════════════════
@@ -343,5 +355,106 @@ public class MainMenuManager : MonoBehaviour
         fadeCanvasGroup.alpha = 1f;
 
         SceneManager.LoadScene(gameSceneName);
+    }
+
+    // ═════════════════════════════════════════════════════════
+    //  BUTTON ANIMATION SYSTEM
+    // ═════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Finds all buttons in the menu and attaches the animation/sound component.
+    /// </summary>
+    private void SetupButtonEffects()
+    {
+        Button[] allButtons = GetComponentsInChildren<Button>(true);
+        foreach (Button btn in allButtons)
+        {
+            // PRO FIX: Prevent adding duplicate handlers if this is called multiple times
+            if (btn.gameObject.GetComponent<ButtonEffectHandler>() != null) continue;
+
+            // Add a helper component to manage its own animation state
+            ButtonEffectHandler handler = btn.gameObject.AddComponent<ButtonEffectHandler>();
+            handler.Initialize(this, btn);
+        }
+    }
+
+    /// <summary>
+    /// Helper class created dynamically to handle hover/click effects for each button.
+    /// </summary>
+    private class ButtonEffectHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+    {
+        private MainMenuManager manager;
+        private Button button;
+        private Graphic buttonGraphic; // Use Graphic to support both Image and Text
+        private Vector3 originalScale;
+        private Color originalColor;
+        private Vector3 targetScale;
+        private Color targetColor;
+
+        public void Initialize(MainMenuManager mgr, Button btn)
+        {
+            manager = mgr;
+            button = btn;
+            
+            // Use targetGraphic (this is what the button normally tints)
+            buttonGraphic = button.targetGraphic;
+            
+            // Disable built-in transition to prevent it from overriding our manual fade
+            button.transition = Selectable.Transition.None;
+            
+            originalScale = transform.localScale;
+            targetScale = originalScale;
+
+            if (buttonGraphic != null)
+            {
+                originalColor = buttonGraphic.color;
+                targetColor = originalColor;
+            }
+
+            // Add click listener for sound
+            button.onClick.AddListener(PlayClickSound);
+        }
+
+        void Update()
+        {
+            // Smoothly lerp scale
+            if (transform.localScale != targetScale)
+            {
+                transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * manager.animationSpeed);
+            }
+            
+            // Smoothly lerp color
+            if (buttonGraphic != null && buttonGraphic.color != targetColor)
+            {
+                buttonGraphic.color = Color.Lerp(buttonGraphic.color, targetColor, Time.deltaTime * manager.animationSpeed);
+            }
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            // Only play effects if the button is interactable
+            if (button != null && !button.interactable) return;
+
+            targetScale = originalScale * manager.hoverScaleSize;
+            if (buttonGraphic != null) targetColor = manager.hoverFadeColor;
+
+            if (manager.hoverSFX != null && manager.sfxSource != null)
+            {
+                manager.sfxSource.PlayOneShot(manager.hoverSFX);
+                // Debug.Log("Hover sound played on: " + gameObject.name);
+            }
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            targetScale = originalScale;
+            if (buttonGraphic != null) targetColor = originalColor;
+        }
+
+        private void PlayClickSound()
+        {
+            if (manager.clickSFX != null && manager.sfxSource != null)
+                manager.sfxSource.PlayOneShot(manager.clickSFX);
+        }
     }
 }
