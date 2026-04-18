@@ -32,14 +32,11 @@ public class EnemyProjectile : MonoBehaviour
         {
             Debug.Log("Bullet hit the Player for " + damage + " damage!");
             
+<<<<<<< Updated upstream
             PlayerHealth health = hitObject.GetComponent<PlayerHealth>();
             if (health != null)
             {
                 health.TakeDamage(damage);
             }
-        }
-
-        // Destroy the bullet as soon as it hits something
-        Destroy(gameObject);
     }
 }
