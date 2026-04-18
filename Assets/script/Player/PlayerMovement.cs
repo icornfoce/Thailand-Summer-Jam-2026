@@ -19,6 +19,17 @@ public class PlayerMovement : MonoBehaviour
     public float mouseSensitivity = 2f;
     public float maxLookAngle = 89f;
 
+    [Header("Camera Effects (Momentum & Flow)")]
+    public float baseFOV = 90f;
+    public float dashFOV = 110f;
+    public float fovTransitionSpeed = 10f;
+    public float strafeTiltAngle = 3f;
+    public float dashTiltAngle = 10f;
+    public float tiltTransitionSpeed = 6f;
+
+    private Camera camComponent;
+    private float currentTilt = 0f;
+
     private CharacterController characterController;
     private Vector3 velocity;
     private bool isGrounded;
@@ -41,11 +52,18 @@ public class PlayerMovement : MonoBehaviour
         {
             playerCamera = GetComponentInChildren<Camera>()?.transform;
         }
+        
+        if (playerCamera != null)
+        {
+            camComponent = playerCamera.GetComponent<Camera>();
+            if (camComponent != null) camComponent.fieldOfView = baseFOV;
+        }
     }
 
     void Update()
     {
         HandleMouseLook();
+        HandleCameraEffects();
 
         if (isDashing)
         {
@@ -69,8 +87,40 @@ public class PlayerMovement : MonoBehaviour
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -maxLookAngle, maxLookAngle);
 
-        playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        // --- ระบบเอียงกล้องเวลาเดินข้าง (Strafe Tilt) ---
+        float xMove = Input.GetAxisRaw("Horizontal");
+        float targetTilt = -xMove * strafeTiltAngle;
+
+        // ถ้ากำลังพุ่ง (Dash) ไปด้านข้าง ให้กล้องเอียงเยอะขึ้นเพื่อเน้นโมเมนตัม
+        if (isDashing && Mathf.Abs(xMove) > 0.1f)
+        {
+            targetTilt = -xMove * dashTiltAngle;
+        }
+
+        currentTilt = Mathf.Lerp(currentTilt, targetTilt, tiltTransitionSpeed * Time.deltaTime);
+
+        // ใส่ค่า Tilt ไปที่แกน Z ของกล้อง
+        playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, currentTilt);
         transform.Rotate(Vector3.up * mouseX);
+    }
+
+    void HandleCameraEffects()
+    {
+        if (camComponent == null) return;
+
+        // --- ระบบยืด/หด FOV ตามความเร็ว ---
+        float targetFOV = baseFOV;
+        
+        if (isDashing)
+        {
+            targetFOV = dashFOV; // ยืดหน้าจอตอนพุ่ง
+        }
+        else if (Input.GetKey(KeyCode.LeftShift))
+        {
+            targetFOV = baseFOV + 10f; // เดินเร็วหน้าจอจะยืดออกนิดนึง
+        }
+
+        camComponent.fieldOfView = Mathf.Lerp(camComponent.fieldOfView, targetFOV, fovTransitionSpeed * Time.deltaTime);
     }
 
     void HandleMovement()

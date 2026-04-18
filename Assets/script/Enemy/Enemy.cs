@@ -94,12 +94,15 @@ public class Enemy : MonoBehaviour
         // Check for player inside the hitbox (overlap sphere)
         Collider[] hitPlayers = Physics.OverlapSphere(attackPoint.position, hitboxRadius, playerLayer);
         
-        foreach (Collider player in hitPlayers)
+        foreach (Collider hitPlayer in hitPlayers)
         {
-            Debug.Log("Enemy hit " + player.name + " for " + attackDamage + " damage!");
+            Debug.Log("Enemy hit " + hitPlayer.name + " for " + attackDamage + " damage!");
             
-            // TODO: Call your player's damage script here
-            // Example: player.GetComponent<PlayerHealth>().TakeDamage(attackDamage);
+            PlayerHealth health = hitPlayer.GetComponent<PlayerHealth>();
+            if (health != null)
+            {
+                health.TakeDamage(attackDamage);
+            }
         }
     }
 
