@@ -13,6 +13,7 @@ public class MainMenuManager : MonoBehaviour
     // ─────────────────────────────────────────────────────────
 
     [Header("Panels")]
+    public GameObject mainMenuPanel;        // (Optional) Drag MainMenu container here for fade effect
     public GameObject settingsPanel;        // Drag SettingsPanel here
     public GameObject confirmQuitPanel;     // (Optional) Drag ConfirmQuitPanel here
 
@@ -47,6 +48,7 @@ public class MainMenuManager : MonoBehaviour
     private Resolution[] resolutions;
     private bool isSettingsOpen = false;
     private Coroutine settingsFadeCoroutine;
+    private Coroutine mainMenuFadeCoroutine;
     private float settingsFadeSpeed = 0.3f; // ความเร็วในการเปิดปิดหน้าต่าง Setting
 
     // ─────────────────────────────────────────────────────────
@@ -179,11 +181,26 @@ public class MainMenuManager : MonoBehaviour
         settingsPanel.SetActive(true);
 
         // ดึง CanvasGroup จาก SettingsPanel โดยตรงเพื่อทำ Fade-In
-        CanvasGroup cg = settingsPanel.GetComponent<CanvasGroup>();
-        if (cg != null)
+        CanvasGroup cgSettings = settingsPanel.GetComponent<CanvasGroup>();
+        if (cgSettings != null)
         {
             if (settingsFadeCoroutine != null) StopCoroutine(settingsFadeCoroutine);
-            settingsFadeCoroutine = StartCoroutine(FadeSettingsPanel(cg, cg.alpha, 1f, true));
+            settingsFadeCoroutine = StartCoroutine(FadeSettingsPanel(cgSettings, cgSettings.alpha, 1f, true));
+        }
+
+        // ทำให้ Main Menu เฟดออก
+        if (mainMenuPanel != null)
+        {
+            CanvasGroup cgMain = mainMenuPanel.GetComponent<CanvasGroup>();
+            if (cgMain != null)
+            {
+                if (mainMenuFadeCoroutine != null) StopCoroutine(mainMenuFadeCoroutine);
+                mainMenuFadeCoroutine = StartCoroutine(FadeMainMenuPanel(cgMain, cgMain.alpha, 0f, false));
+            }
+            else
+            {
+                mainMenuPanel.SetActive(false); // ถ้าไม่มี CanvasGroup ให้เซ็ตปิดไปเลย
+            }
         }
 
         if (EventSystem.current != null)
@@ -200,15 +217,27 @@ public class MainMenuManager : MonoBehaviour
         isSettingsOpen = false;
 
         // ดึง CanvasGroup จาก SettingsPanel เพื่อทำ Fade-Out
-        CanvasGroup cg = settingsPanel.GetComponent<CanvasGroup>();
-        if (cg != null)
+        CanvasGroup cgSettings = settingsPanel.GetComponent<CanvasGroup>();
+        if (cgSettings != null)
         {
             if (settingsFadeCoroutine != null) StopCoroutine(settingsFadeCoroutine);
-            settingsFadeCoroutine = StartCoroutine(FadeSettingsPanel(cg, cg.alpha, 0f, false));
+            settingsFadeCoroutine = StartCoroutine(FadeSettingsPanel(cgSettings, cgSettings.alpha, 0f, false));
         }
         else
         {
             settingsPanel.SetActive(false); // ถ้าไม่มี CanvasGroup ให้ปิดทันที
+        }
+
+        // ทำให้ Main Menu เฟดเข้ากลับมาที่เดิม
+        if (mainMenuPanel != null)
+        {
+            mainMenuPanel.SetActive(true);
+            CanvasGroup cgMain = mainMenuPanel.GetComponent<CanvasGroup>();
+            if (cgMain != null)
+            {
+                if (mainMenuFadeCoroutine != null) StopCoroutine(mainMenuFadeCoroutine);
+                mainMenuFadeCoroutine = StartCoroutine(FadeMainMenuPanel(cgMain, cgMain.alpha, 1f, true));
+            }
         }
 
         if (EventSystem.current != null)
@@ -216,7 +245,7 @@ public class MainMenuManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Coroutine สำหรับค่อยๆ Fade โชว์และซ่อน
+    /// Coroutine สำหรับค่อยๆ Fade โชว์และซ่อน Settings Panel
     /// </summary>
     private IEnumerator FadeSettingsPanel(CanvasGroup cg, float startAlpha, float endAlpha, bool isOpen)
     {
@@ -240,6 +269,36 @@ public class MainMenuManager : MonoBehaviour
         else
         {
             settingsPanel.SetActive(false); // ตอนปิด พอเฟดเสร็จ ให้ปิด Active ทิ้งเพื่อไม่ให้กินทรัพยากร
+        }
+    }
+
+    /// <summary>
+    /// Coroutine สำหรับค่อยๆ Fade โชว์และซ่อน Main Menu Panel
+    /// </summary>
+    private IEnumerator FadeMainMenuPanel(CanvasGroup cg, float startAlpha, float endAlpha, bool isOpen)
+    {
+        float timer = 0f;
+        cg.interactable = false;
+        
+        while (timer < settingsFadeSpeed)
+        {
+            timer += Time.deltaTime;
+            cg.alpha = Mathf.Lerp(startAlpha, endAlpha, timer / settingsFadeSpeed);
+            yield return null;
+        }
+        
+        cg.alpha = endAlpha;
+        
+        if (isOpen)
+        {
+            cg.interactable = true;
+            cg.blocksRaycasts = true;
+        }
+        else
+        {
+            cg.interactable = false;
+            cg.blocksRaycasts = false;
+            mainMenuPanel.SetActive(false); // ซ่อน Main Menu ชั่วคราวเพื่อประหยัดทรัพยากร
         }
     }
 
