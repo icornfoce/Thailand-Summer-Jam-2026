@@ -369,7 +369,7 @@ RectTransform:
   m_Father: {fileID: 588489643}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0.75, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -2010,8 +2010,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 419417552}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.75, y: 0}
-  m_AnchorMax: {x: 0.75, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -2227,9 +2227,9 @@ MonoBehaviour:
   fadeCanvasGroup: {fileID: 0}
   fadeDuration: 0.97
   audioMixer: {fileID: 0}
-  masterVolumeSlider: {fileID: 414405498}
-  musicVolumeSlider: {fileID: 41997418}
-  sfxVolumeSlider: {fileID: 108934331}
+  masterVolumeSlider: {fileID: 0}
+  musicVolumeSlider: {fileID: 0}
+  sfxVolumeSlider: {fileID: 0}
   fullscreenToggle: {fileID: 0}
   resolutionDropdown: {fileID: 0}
   hoverScaleSize: 1.1
@@ -2551,8 +2551,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 121352251}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.75, y: 0}
-  m_AnchorMax: {x: 0.75, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -2742,7 +2742,7 @@ RectTransform:
   m_Father: {fileID: 1242796598}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0.75, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -3353,7 +3353,7 @@ MonoBehaviour:
   settingsPanel: {fileID: 1880499282}
   confirmQuitPanel: {fileID: 0}
   gameSceneName: GameScene
-  fadeCanvasGroup: {fileID: 1880499286}
+  fadeCanvasGroup: {fileID: 0}
   fadeDuration: 1
   audioMixer: {fileID: 0}
   masterVolumeSlider: {fileID: 414405498}
@@ -3366,7 +3366,7 @@ MonoBehaviour:
   hoverFadeColor: {r: 1, g: 0, b: 0, a: 1}
   sfxSource: {fileID: 280756274}
   hoverSFX: {fileID: 8300000, guid: fd06249f58c706c4aa6b518da18a9f76, type: 3}
-  clickSFX: {fileID: 0}
+  clickSFX: {fileID: 8300000, guid: c5282ce919831eb42990f5893011429d, type: 3}
 --- !u!114 &1866035456
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3445,8 +3445,8 @@ RectTransform:
   - {fileID: 121244950}
   - {fileID: 1023917001}
   - {fileID: 554811149}
-  - {fileID: 1880499283}
   - {fileID: 1374356177}
+  - {fileID: 1880499283}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -3472,7 +3472,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1880499283
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3481,7 +3481,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1880499282}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -22.8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3583,7 +3583,7 @@ RectTransform:
   m_Father: {fileID: 2003036581}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0.75, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -3768,8 +3768,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1535092869}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.75, y: 0}
-  m_AnchorMax: {x: 0.75, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}

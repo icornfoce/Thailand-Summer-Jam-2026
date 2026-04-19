@@ -46,6 +46,8 @@ public class MainMenuManager : MonoBehaviour
     // ─────────────────────────────────────────────────────────
     private Resolution[] resolutions;
     private bool isSettingsOpen = false;
+    private Coroutine settingsFadeCoroutine;
+    private float settingsFadeSpeed = 0.3f; // ความเร็วในการเปิดปิดหน้าต่าง Setting
 
     // ─────────────────────────────────────────────────────────
     // Start() — Initialize everything
@@ -146,19 +148,24 @@ public class MainMenuManager : MonoBehaviour
     /// </summary>
     public void OnToggleSettings()
     {
-        if (settingsPanel == null) return;
+        Debug.Log("OnToggleSettings called!"); 
 
-        // ตรวจสอบสถานะว่าเปิดอยู่หรือปิดอยู่จากตัว Panel โดยตรง เพื่อป้องกันสถานะบัค (desync)
-        bool isActive = settingsPanel.activeSelf;
+        if (settingsPanel == null)
+        {
+            Debug.LogError("MainMenuManager: settingsPanel ไม่ได้ถูกใส่ไว้ในช่อง Inspector!");
+            return;
+        }
+
+        if (isSettingsOpen)
+        {
+            OnCloseSettings();
+        }
+        else
+        {
+            OnOpenSettings();
+        }
         
-        settingsPanel.SetActive(!isActive);
-        isSettingsOpen = !isActive;
-
-        // Deselect the current button so it can be clicked again
-        if (EventSystem.current != null)
-            EventSystem.current.SetSelectedGameObject(null);
-
-        Debug.Log("Settings panel: " + (!isActive ? "Opened" : "Closed"));
+        Debug.Log("Settings panel is now: " + (isSettingsOpen ? "Opened" : "Closed"));
     }
 
     /// <summary>
@@ -166,11 +173,21 @@ public class MainMenuManager : MonoBehaviour
     /// </summary>
     public void OnOpenSettings()
     {
-        if (settingsPanel != null)
+        if (settingsPanel == null) return;
+        
+        isSettingsOpen = true;
+        settingsPanel.SetActive(true);
+
+        // ดึง CanvasGroup จาก SettingsPanel โดยตรงเพื่อทำ Fade-In
+        CanvasGroup cg = settingsPanel.GetComponent<CanvasGroup>();
+        if (cg != null)
         {
-            settingsPanel.SetActive(true);
-            isSettingsOpen = true;
+            if (settingsFadeCoroutine != null) StopCoroutine(settingsFadeCoroutine);
+            settingsFadeCoroutine = StartCoroutine(FadeSettingsPanel(cg, cg.alpha, 1f, true));
         }
+
+        if (EventSystem.current != null)
+            EventSystem.current.SetSelectedGameObject(null);
     }
 
     /// <summary>
@@ -178,15 +195,52 @@ public class MainMenuManager : MonoBehaviour
     /// </summary>
     public void OnCloseSettings()
     {
-        if (settingsPanel != null)
+        if (settingsPanel == null) return;
+
+        isSettingsOpen = false;
+
+        // ดึง CanvasGroup จาก SettingsPanel เพื่อทำ Fade-Out
+        CanvasGroup cg = settingsPanel.GetComponent<CanvasGroup>();
+        if (cg != null)
         {
-            settingsPanel.SetActive(false);
-            isSettingsOpen = false;
+            if (settingsFadeCoroutine != null) StopCoroutine(settingsFadeCoroutine);
+            settingsFadeCoroutine = StartCoroutine(FadeSettingsPanel(cg, cg.alpha, 0f, false));
+        }
+        else
+        {
+            settingsPanel.SetActive(false); // ถ้าไม่มี CanvasGroup ให้ปิดทันที
         }
 
-        // Deselect so buttons reset properly
         if (EventSystem.current != null)
             EventSystem.current.SetSelectedGameObject(null);
+    }
+
+    /// <summary>
+    /// Coroutine สำหรับค่อยๆ Fade โชว์และซ่อน
+    /// </summary>
+    private IEnumerator FadeSettingsPanel(CanvasGroup cg, float startAlpha, float endAlpha, bool isOpen)
+    {
+        float timer = 0f;
+        cg.interactable = false; // ป้องกันผู้เล่นกดปุ่มรัวๆ ในขณะที่หน้าจอกำลังเฟด
+        
+        while (timer < settingsFadeSpeed)
+        {
+            timer += Time.deltaTime;
+            cg.alpha = Mathf.Lerp(startAlpha, endAlpha, timer / settingsFadeSpeed);
+            yield return null;
+        }
+        
+        cg.alpha = endAlpha;
+        
+        if (isOpen)
+        {
+            cg.interactable = true;
+            cg.blocksRaycasts = true;
+        }
+        else
+        {
+            settingsPanel.SetActive(false); // ตอนปิด พอเฟดเสร็จ ให้ปิด Active ทิ้งเพื่อไม่ให้กินทรัพยากร
+        }
     }
 
     // ═══════════════════════════════════════════════════════
