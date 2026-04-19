@@ -8,6 +8,9 @@ public class EnemyHealth : MonoBehaviour
     [Header("Reward Settings")]
     public int healAmountOnDeath = 15; // คืนเลือด/แสงสว่างให้ศัตรูตอนตาย (Core Mechanic)
 
+    [Header("Audio")]
+    public AudioClip deathSfx;
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -38,6 +41,11 @@ public class EnemyHealth : MonoBehaviour
         }
 
         // TODO: สั่งเล่น Effect เลือดสาดตรงนี้ในอนาคต
+
+        if (deathSfx != null)
+        {
+            AudioSource.PlayClipAtPoint(deathSfx, transform.position);
+        }
 
         // ลบศัตรูทิ้ง
         Destroy(gameObject);

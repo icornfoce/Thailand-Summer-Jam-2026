@@ -1,6 +1,7 @@
 using UnityEngine;
+using UnityEngine.AI;
 
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(NavMeshAgent))]
 public class Enemy : MonoBehaviour
 {
     [Header("Movement")]
@@ -16,15 +17,17 @@ public class Enemy : MonoBehaviour
     public float hitboxRadius = 0.5f;
     public LayerMask playerLayer;
 
+    [Header("Audio")]
+    public AudioClip attackSfx;
+
     private Transform playerTransform;
-    private Rigidbody rb;
+    private NavMeshAgent agent;
     private float nextAttackTime = 0f;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
-        // Freeze rotation so the physics engine doesn't make the enemy tip over
-        rb.freezeRotation = true;
+        agent = GetComponent<NavMeshAgent>();
+        agent.speed = speed;
 
         // Find the player object using its tag
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -38,7 +41,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    void FixedUpdate()
+    void Update()
     {
         // If the player exists, track and possibly attack them
         if (playerTransform != null)
@@ -48,21 +51,24 @@ public class Enemy : MonoBehaviour
             Vector3 flatEnemyPos = new Vector3(transform.position.x, 0, transform.position.z);
             float distanceToPlayer = Vector3.Distance(flatEnemyPos, flatPlayerPos);
 
-            // Calculate direction to player
+            // Calculate direction to player manually to face them
             Vector3 direction = (playerTransform.position - transform.position).normalized;
             direction.y = 0; // Ignore the Y-axis 
-
-            // Make the enemy face the player
-            if (direction != Vector3.zero)
-            {
-                transform.forward = direction;
-            }
 
             // Check if player is within attack range
             if (distanceToPlayer <= attackRange)
             {
                 // Stop moving to attack
-                rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0); 
+                if (agent.isOnNavMesh)
+                {
+                    agent.isStopped = true;
+                }
+                
+                // Make the enemy face the player
+                if (direction != Vector3.zero)
+                {
+                    transform.forward = direction;
+                }
                 
                 // Check if attack cooldown has finished
                 if (Time.time >= nextAttackTime)
@@ -73,9 +79,12 @@ public class Enemy : MonoBehaviour
             }
             else
             {
-                // Move the enemy using Rigidbody
-                Vector3 targetPosition = transform.position + direction * speed * Time.fixedDeltaTime;
-                rb.MovePosition(targetPosition);
+                // Move the enemy using NavMeshAgent
+                if (agent.isOnNavMesh)
+                {
+                    agent.isStopped = false;
+                    agent.SetDestination(playerTransform.position);
+                }
             }
         }
     }
@@ -83,6 +92,11 @@ public class Enemy : MonoBehaviour
     private void Attack()
     {
         Debug.Log("Enemy swings at player!");
+
+        if (attackSfx != null)
+        {
+            AudioSource.PlayClipAtPoint(attackSfx, transform.position);
+        }
 
         // We can't do the hitbox check if the attack point isn't assigned
         if (attackPoint == null)

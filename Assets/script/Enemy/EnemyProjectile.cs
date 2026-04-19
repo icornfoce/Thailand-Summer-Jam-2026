@@ -31,15 +31,11 @@ public class EnemyProjectile : MonoBehaviour
         if (hitObject.CompareTag("Player"))
         {
             Debug.Log("Bullet hit the Player for " + damage + " damage!");
-            
             PlayerHealth health = hitObject.GetComponent<PlayerHealth>();
             if (health != null)
             {
                 health.TakeDamage(damage);
             }
         }
-
-        // Destroy the bullet as soon as it hits something
-        Destroy(gameObject);
     }
 }

@@ -1,6 +1,7 @@
 using UnityEngine;
+using UnityEngine.AI;
 
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(NavMeshAgent))]
 public class RangedEnemy : MonoBehaviour
 {
     [Header("Movement")]
@@ -16,15 +17,18 @@ public class RangedEnemy : MonoBehaviour
     public Transform firePoint; // Where the projectile spawns
     public float projectileSpeed = 10f; // Speed of the projectile
     
+    [Header("Audio")]
+    public AudioClip attackSfx;
+    
     private float nextFireTime = 0f;
     private Transform playerTransform;
-    private Rigidbody rb;
+    private NavMeshAgent agent;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
-        // Freeze rotation so the physics engine doesn't make the enemy tip over
-        rb.freezeRotation = true;
+        agent = GetComponent<NavMeshAgent>();
+        agent.speed = speed;
+        agent.updateRotation = false; // We handle rotation manually
 
         // Find the player object using its tag
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -38,7 +42,7 @@ public class RangedEnemy : MonoBehaviour
         }
     }
 
-    void FixedUpdate()
+    void Update()
     {
         // If the player exists, track them
         if (playerTransform != null)
@@ -49,7 +53,7 @@ public class RangedEnemy : MonoBehaviour
             // Ignore the Y-axis so the enemy doesn't try to fly up or burrow into the ground
             direction.y = 0;
 
-            // Make the enemy face the player (even when stopped)
+            // Make the enemy face the player (even when stopped or retreating)
             if (direction != Vector3.zero)
             {
                 transform.forward = direction;
@@ -63,19 +67,30 @@ public class RangedEnemy : MonoBehaviour
             // Move towards player if too far
             if (distanceToPlayer > stoppingDistance)
             {
-                Vector3 targetPosition = transform.position + direction * speed * Time.fixedDeltaTime;
-                rb.MovePosition(targetPosition);
+                if (agent.isOnNavMesh)
+                {
+                    agent.isStopped = false;
+                    agent.SetDestination(playerTransform.position);
+                }
             }
             // Move away from player if too close
             else if (distanceToPlayer < retreatDistance)
             {
-                Vector3 targetPosition = transform.position - direction * speed * Time.fixedDeltaTime;
-                rb.MovePosition(targetPosition);
+                if (agent.isOnNavMesh)
+                {
+                    agent.isStopped = false;
+                    // Move in the opposite direction of the player
+                    Vector3 retreatPosition = transform.position - direction * retreatDistance;
+                    agent.SetDestination(retreatPosition);
+                }
             }
             // Stop moving if in the sweet spot between retreatDistance and stoppingDistance
             else
             {
-                rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0); 
+                if (agent.isOnNavMesh)
+                {
+                    agent.isStopped = true;
+                }
             }
             
             // Combat logic: Shoot if within range and cooldown is ready
@@ -93,6 +108,11 @@ public class RangedEnemy : MonoBehaviour
         {
             Debug.LogWarning("Projectile Prefab or Fire Point is not assigned on " + gameObject.name);
             return;
+        }
+
+        if (attackSfx != null)
+        {
+            AudioSource.PlayClipAtPoint(attackSfx, transform.position);
         }
 
         // Spawn the projectile at the fire point
