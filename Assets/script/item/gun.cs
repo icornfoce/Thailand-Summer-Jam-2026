@@ -234,16 +234,36 @@ public class gun : MonoBehaviour
 
     private void ExecuteProjectile(Vector3 direction)
     {
-        if (projectilePrefab == null || firePoint == null) return;
+        if (projectilePrefab == null)
+        {
+            Debug.LogWarning("⚠️ ยิง Projectile ไม่ออก เพราะคุณยังไม่ได้ลากลูกกระสุนมาใส่ช่อง 'Projectile Prefab' ในตั้งค่าปืน!");
+            return;
+        }
+        if (firePoint == null)
+        {
+            Debug.LogWarning("⚠️ ยิง Projectile ไม่ออก เพราะคุณยังไม่ได้ใส่ 'Fire Point' ตรงปลายปืน!");
+            return;
+        }
 
         // เสกกระสุน
         GameObject projectile = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
         
+        // ส่งตัวเลขดาเมจไปให้ตัวกระสุนทำงานอย่างแม่นยำ
+        PlayerProjectile projScript = projectile.GetComponent<PlayerProjectile>();
+        if (projScript != null)
+        {
+            projScript.damage = damage;
+        }
+
         // ทำให้พุ่งไปข้างหน้าโดยเข้าถึงและอัปเดตแรงฟิสิกส์
         Rigidbody rb = projectile.GetComponent<Rigidbody>();
         if (rb != null)
         {
             rb.linearVelocity = direction * projectileForce;
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ กระสุนของคุณ ({projectilePrefab.name}) ไม่มี Component 'Rigidbody' ติดอยู่ มันจึงพุ่งออกไปไม่ได้ครับ!");
         }
     }
 
