@@ -148,14 +148,17 @@ public class MainMenuManager : MonoBehaviour
     {
         if (settingsPanel == null) return;
 
-        isSettingsOpen = !isSettingsOpen;
-        settingsPanel.SetActive(isSettingsOpen);
+        // ตรวจสอบสถานะว่าเปิดอยู่หรือปิดอยู่จากตัว Panel โดยตรง เพื่อป้องกันสถานะบัค (desync)
+        bool isActive = settingsPanel.activeSelf;
+        
+        settingsPanel.SetActive(!isActive);
+        isSettingsOpen = !isActive;
 
         // Deselect the current button so it can be clicked again
         if (EventSystem.current != null)
             EventSystem.current.SetSelectedGameObject(null);
 
-        Debug.Log("Settings panel: " + (isSettingsOpen ? "Opened" : "Closed"));
+        Debug.Log("Settings panel: " + (!isActive ? "Opened" : "Closed"));
     }
 
     /// <summary>
