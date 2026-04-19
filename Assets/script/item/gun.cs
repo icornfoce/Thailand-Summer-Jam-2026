@@ -22,13 +22,9 @@ public class gun : MonoBehaviour
     public float fireRate = 0.1f; 
     [Tooltip("ระยะยิงถึงสูงสุด (สำหรับ Hitscan)")]
     public float range = 100f;
-    [Tooltip("เวลาที่ใช้ในการรีโหลด (วินาที)")]
-    public float reloadTime = 1.5f;
 
-    [Header("Ammo Settings")]
-    public int magazineSize = 30;
-    public int currentAmmo;
-    [Tooltip("เสีย HP เท่าไหร่เวลายิง 1 นัด (เลือดคือกระสุน)")]
+    [Header("Blood Cost Settings")]
+    [Tooltip("เสีย HP เท่าไหร่เวลายิง 1 นัด (ไม่มีความจุกระสุนอีกต่อไป ใช้เลือดเพรียวๆ)")]
     public int hpCostPerShot = 1;
     private PlayerHealth playerHealth;
 
@@ -50,18 +46,15 @@ public class gun : MonoBehaviour
     public GameObject hitEffect; // สำหรับรอยกระสุนหรือสะเก็ดไฟกระทบกำแพง
     public AudioSource audioSource;
     public AudioClip shootSound;
-    public AudioClip reloadSound;
-    public AudioClip emptySound;
+    public AudioClip emptySound; // เสียงตอนเลือดไม่พอให้ยิง
     
     // Internal States
     private bool isShooting;
     private bool readyToShoot = true;
-    private bool isReloading = false;
     private int bulletsShotInBurst;
 
     void Start()
     {
-        currentAmmo = magazineSize;
         readyToShoot = true;
 
         // เชื่อมต่อระบบเลือดเพื่อใช้เป็นกระสุน
@@ -100,16 +93,13 @@ public class gun : MonoBehaviour
             isShooting = Input.GetMouseButtonDown(0); // คลิกทีละครั้ง
         }
 
-        // 2. เช็คปุ่มรีโหลด
-        if (Input.GetKeyDown(KeyCode.R) && currentAmmo < magazineSize && !isReloading) // หรือปุ่มอื่นที่สะดวก
-        {
-            StartCoroutine(Reload());
-        }
+        // 2. เช็คว่ามีเลือดพอให้ยิงหรือไม่
+        bool hasEnoughBlood = playerHealth != null && playerHealth.currentHealth >= hpCostPerShot;
 
-        // 3. จัดการตอนกดยิงแต่กระสุนหมด
-        if (readyToShoot && isShooting && !isReloading && currentAmmo <= 0)
+        // 3. จัดการตอนกดยิงแต่เลือดไม่พอ (กระสุนหมด)
+        if (readyToShoot && isShooting && !hasEnoughBlood)
         {
-            if (Input.GetMouseButtonDown(0)) // กดกริ๊กๆ ฟังเสียง
+            if (Input.GetMouseButtonDown(0)) // กดกริ๊กๆ ฟังเสียงเหนี่ยวไกฟรี
             {
                 if (emptySound != null && audioSource != null) 
                     audioSource.PlayOneShot(emptySound);
@@ -118,7 +108,7 @@ public class gun : MonoBehaviour
         }
 
         // 4. สั่งยิง (ผ่านเงื่อนไขครบ)
-        if (readyToShoot && isShooting && !isReloading && currentAmmo > 0)
+        if (readyToShoot && isShooting && hasEnoughBlood)
         {
             if (fireMode == FireMode.Burst)
             {
@@ -162,10 +152,7 @@ public class gun : MonoBehaviour
             }
         }
 
-        // หักกระสุนทิ้ง (ยิงลูกซอง 8 เม็ด ກ็นับว่าลด 1 นัด)
-        currentAmmo--;
-        
-        // หักเลือดผู้เล่น
+        // หักเลือดผู้เล่นแทนการหักกระสุน
         if (playerHealth != null && hpCostPerShot > 0)
         {
             playerHealth.DrainHealth(hpCostPerShot);
@@ -184,7 +171,8 @@ public class gun : MonoBehaviour
         // โหมด Burst ยิงรัวเป็นชุด (เช่น ชุดละ 3 นัด โดยใชั bulletsPerTap กำหนด)
         bulletsShotInBurst = bulletsPerTap;
 
-        while (bulletsShotInBurst > 0 && currentAmmo > 0)
+        // วนลูปการยิงรัว และหยุดทันทีที่เลือดไม่พอ (ฉลาดมาก)
+        while (bulletsShotInBurst > 0 && playerHealth != null && playerHealth.currentHealth >= hpCostPerShot)
         {
             Transform aimOrigin = (playerCamera != null) ? playerCamera.transform : (firePoint != null ? firePoint : transform);
             
@@ -202,11 +190,9 @@ public class gun : MonoBehaviour
                 ExecuteProjectile(finalDirection);
             }
 
-            currentAmmo--;
-            if (playerHealth != null && hpCostPerShot > 0)
-            {
-                playerHealth.DrainHealth(hpCostPerShot);
-            }
+            // หักเลือดทีละนัด
+            playerHealth.DrainHealth(hpCostPerShot);
+            
             bulletsShotInBurst--;
             PlayShootEffects();
 
@@ -225,7 +211,6 @@ public class gun : MonoBehaviour
         // ยิงเลเซอร์ไร้รอยต่อทะลุอากาศไปเช็คเป้าหมาย
         if (Physics.Raycast(origin, direction, out RaycastHit hit, range))
         {
-            // เช็คว่าชนศัตรูไหมโดยเรียกใช้คลาส EnemyHealth เหมือนตอนปะทะด้วยดาบ/เป้า
             EnemyHealth enemyHealth = hit.collider.GetComponentInParent<EnemyHealth>();
             if (enemyHealth != null)
             {
@@ -302,21 +287,5 @@ public class gun : MonoBehaviour
     private void ResetShot()
     {
         readyToShoot = true;
-    }
-
-    private IEnumerator Reload()
-    {
-        isReloading = true;
-        
-        if (reloadSound != null && audioSource != null)
-        {
-            audioSource.PlayOneShot(reloadSound);
-        }
-
-        // จำลองเวลาบรรจุกระสุน
-        yield return new WaitForSeconds(reloadTime);
-
-        currentAmmo = magazineSize;
-        isReloading = false;
     }
 }
