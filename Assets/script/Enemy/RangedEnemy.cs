@@ -17,8 +17,9 @@ public class RangedEnemy : MonoBehaviour
     public Transform firePoint; // Where the projectile spawns
     public float projectileSpeed = 10f; // Speed of the projectile
     
-    [Header("Audio")]
+    [Header("Audio & Visuals")]
     public AudioClip attackSfx;
+    public GameObject attackVfx;
     
     private float nextFireTime = 0f;
     private Transform playerTransform;
@@ -113,6 +114,11 @@ public class RangedEnemy : MonoBehaviour
         if (attackSfx != null)
         {
             AudioSource.PlayClipAtPoint(attackSfx, transform.position);
+        }
+
+        if (attackVfx != null && firePoint != null)
+        {
+            Instantiate(attackVfx, firePoint.position, firePoint.rotation);
         }
 
         // Spawn the projectile at the fire point

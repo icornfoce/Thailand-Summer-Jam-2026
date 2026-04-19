@@ -17,8 +17,9 @@ public class Enemy : MonoBehaviour
     public float hitboxRadius = 0.5f;
     public LayerMask playerLayer;
 
-    [Header("Audio")]
+    [Header("Audio & Visuals")]
     public AudioClip attackSfx;
+    public GameObject attackVfx;
 
     private Transform playerTransform;
     private NavMeshAgent agent;
@@ -96,6 +97,11 @@ public class Enemy : MonoBehaviour
         if (attackSfx != null)
         {
             AudioSource.PlayClipAtPoint(attackSfx, transform.position);
+        }
+
+        if (attackVfx != null && attackPoint != null)
+        {
+            Instantiate(attackVfx, attackPoint.position, attackPoint.rotation);
         }
 
         // We can't do the hitbox check if the attack point isn't assigned
