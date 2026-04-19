@@ -28,6 +28,9 @@ public class gun : MonoBehaviour
     [Header("Ammo Settings")]
     public int magazineSize = 30;
     public int currentAmmo;
+    [Tooltip("เสีย HP เท่าไหร่เวลายิง 1 นัด (เลือดคือกระสุน)")]
+    public int hpCostPerShot = 1;
+    private PlayerHealth playerHealth;
 
     [Header("Spread & Burst/Shotgun")]
     [Tooltip("จำนวนกระสุนที่ออกไปต่อการกดยิง 1 ครั้ง (ใส่น้อยกว่า 2 = ปืนปกติ, ใส่ 8+ = ลูกซอง)")]
@@ -60,6 +63,10 @@ public class gun : MonoBehaviour
     {
         currentAmmo = magazineSize;
         readyToShoot = true;
+
+        // เชื่อมต่อระบบเลือดเพื่อใช้เป็นกระสุน
+        playerHealth = GetComponentInParent<PlayerHealth>();
+        if (playerHealth == null) playerHealth = FindFirstObjectByType<PlayerHealth>();
 
         if (playerCamera == null && Camera.main != null)
         {
@@ -157,6 +164,12 @@ public class gun : MonoBehaviour
 
         // หักกระสุนทิ้ง (ยิงลูกซอง 8 เม็ด ກ็นับว่าลด 1 นัด)
         currentAmmo--;
+        
+        // หักเลือดผู้เล่น
+        if (playerHealth != null && hpCostPerShot > 0)
+        {
+            playerHealth.DrainHealth(hpCostPerShot);
+        }
 
         PlayShootEffects();
 
@@ -190,6 +203,10 @@ public class gun : MonoBehaviour
             }
 
             currentAmmo--;
+            if (playerHealth != null && hpCostPerShot > 0)
+            {
+                playerHealth.DrainHealth(hpCostPerShot);
+            }
             bulletsShotInBurst--;
             PlayShootEffects();
 
