@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour
     public float sprintSpeed = 10f;
     public float jumpHeight = 1.5f;
     public float gravity = -20f; 
+    public float airResistance = 1.5f; 
 
     [Header("Dash Settings")]
     public float dashForce = 25f;
@@ -40,6 +41,43 @@ public class PlayerMovement : MonoBehaviour
     private float lastDashTime = -999f;
     private Vector3 dashDirection;
 
+    [Header("Sliding Settings (Ctrl + W)")]
+    public float slideForce = 15f;
+    public float slideDuration = 0.6f;
+    public float slideHeight = 1f; // Height while sliding
+    public float slideFOV = 105f;
+    private float originalHeight;
+    private Vector3 originalCenter;
+    private bool isSliding;
+    private float slideTimer;
+    private float currentSlideSpeed;
+
+    [Header("Wall Running Settings")]
+    public float wallRunForce = 10f;
+    public float wallRunGravity = -1f; // Slow gravity while wall running
+    public float wallRunJumpForce = 12f;
+    public float wallDistance = 0.6f;
+    public float wallTiltAngle = 15f;
+    public float minHeightToWallRun = 1.5f; // ระยะห่างจากพื้นที่อนุญาตให้ Wall Run
+    public LayerMask wallMask;
+    private bool isWallRunning;
+    private bool wallLeft, wallRight;
+    private RaycastHit leftHit, rightHit;
+    private float wallRunCooldownTimer;
+    public float wallRunCooldown = 0.5f;
+
+    [Header("Screen EFX Context")]
+    [Tooltip("ใส่ Effect เช่น Speed Lines หรือ Overlay ที่นี่")]
+    public GameObject speedBurstEffect; 
+    public GameObject wallRunEffect;
+
+    [Header("Audio Settings")]
+    public AudioSource movementAudioSource;
+    public AudioClip dashSound;
+    public AudioClip slideSound;
+    public AudioClip wallRunLoopSound;
+    public AudioClip jumpSound;
+
     void Start()
     {
         characterController = GetComponent<CharacterController>();
@@ -58,23 +96,45 @@ public class PlayerMovement : MonoBehaviour
             camComponent = playerCamera.GetComponent<Camera>();
             if (camComponent != null) camComponent.fieldOfView = baseFOV;
         }
+
+        originalHeight = characterController.height;
+        originalCenter = characterController.center;
     }
 
     void Update()
     {
+        isGrounded = characterController.isGrounded;
+
         HandleMouseLook();
         HandleCameraEffects();
 
+        CheckForWall();
+        
         if (isDashing)
         {
             HandleDash();
+        }
+        else if (isWallRunning)
+        {
+            HandleWallRun();
+            HandleWallJump();
+        }
+        else if (isSliding)
+        {
+            HandleSliding();
         }
         else
         {
             HandleMovement();
             HandleJump();
             HandleDashInput();
+            HandleSlidingInput();
+            HandleWallRunStart();
         }
+
+        HandleScreenEffectsVisibility();
+
+        if (wallRunCooldownTimer > 0) wallRunCooldownTimer -= Time.deltaTime;
     }
 
     void HandleMouseLook()
@@ -91,10 +151,16 @@ public class PlayerMovement : MonoBehaviour
         float xMove = Input.GetAxisRaw("Horizontal");
         float targetTilt = -xMove * strafeTiltAngle;
 
-        // ถ้ากำลังพุ่ง (Dash) ไปด้านข้าง ให้กล้องเอียงเยอะขึ้นเพื่อเน้นโมเมนตัม
-        if (isDashing && Mathf.Abs(xMove) > 0.1f)
+        // ถ้ากำลังพุ่ง (Dash/Slide) หรือไต่กำแพง ให้กล้องเอียงเพื่อเน้นโมเมนตัม
+        if (isDashing || isSliding)
         {
             targetTilt = -xMove * dashTiltAngle;
+        }
+        
+        if (isWallRunning)
+        {
+            if (wallLeft) targetTilt -= wallTiltAngle;
+            if (wallRight) targetTilt += wallTiltAngle;
         }
 
         currentTilt = Mathf.Lerp(currentTilt, targetTilt, tiltTransitionSpeed * Time.deltaTime);
@@ -111,9 +177,13 @@ public class PlayerMovement : MonoBehaviour
         // --- ระบบยืด/หด FOV ตามความเร็ว ---
         float targetFOV = baseFOV;
         
-        if (isDashing)
+        if (isDashing || isSliding)
         {
-            targetFOV = dashFOV; // ยืดหน้าจอตอนพุ่ง
+            targetFOV = slideFOV; // ยืดหน้าจอตอนพุ่ง/สไลด์
+        }
+        else if (isWallRunning)
+        {
+            targetFOV = baseFOV + 10f;
         }
         else if (Input.GetKey(KeyCode.LeftShift))
         {
@@ -125,10 +195,16 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleMovement()
     {
-        isGrounded = characterController.isGrounded;
-        if (isGrounded && velocity.y < 0)
+        if (isGrounded)
         {
-            velocity.y = -2f; 
+            // ล้างแรงส่งในแนวราบเมื่อแตะพื้น เพื่อไม่ให้ไหลไม่หยุด
+            velocity.x = 0;
+            velocity.z = 0;
+
+            if (velocity.y < 0)
+            {
+                velocity.y = -2f; 
+            }
         }
 
         float x = Input.GetAxisRaw("Horizontal");
@@ -147,6 +223,15 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            PlaySound(jumpSound);
+        }
+
+        // --- เพิ่มระบบ Air Resistance (แรงต้านอากาศ) ---
+        // จะค่อยๆ ลดแรงส่งแนวนอนของ velocity ให้เหลือ 0 เพื่อไม่ให้กระโดดแล้วลอยไปไกลไม่หยุด
+        if (!isGrounded)
+        {
+            velocity.x = Mathf.Lerp(velocity.x, 0, airResistance * Time.deltaTime);
+            velocity.z = Mathf.Lerp(velocity.z, 0, airResistance * Time.deltaTime);
         }
 
         velocity.y += gravity * Time.deltaTime;
@@ -171,6 +256,7 @@ public class PlayerMovement : MonoBehaviour
         lastDashTime = Time.time;
 
         velocity.y = 0f;
+        PlaySound(dashSound);
 
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
@@ -199,5 +285,184 @@ public class PlayerMovement : MonoBehaviour
         {
             isDashing = false;
         }
+    }
+
+    #region Sliding System
+    void HandleSlidingInput()
+    {
+        // เช็คปุ่ม Ctrl หรือ C และต้องเดินหน้าอยู่ (W)
+        bool slideKeyPressed = Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.C);
+        
+        if (slideKeyPressed && Input.GetAxisRaw("Vertical") > 0 && isGrounded && !isSliding)
+        {
+            StartSlide();
+        }
+    }
+
+    void StartSlide()
+    {
+        isSliding = true;
+        slideTimer = slideDuration;
+        currentSlideSpeed = slideForce;
+        
+        // ย่อตัวลง และปรับจุดศูนย์กลางให้เท้ายังติดพื้น (กันปัญหา CC ลอยแล้วหลุดสไลด์)
+        characterController.height = slideHeight;
+        characterController.center = originalCenter + new Vector3(0, (slideHeight - originalHeight) / 2f, 0);
+        
+        // Push initial slide energy
+        velocity.y = -5f; 
+        PlaySound(slideSound);
+    }
+
+    void HandleSliding()
+    {
+        // คำนวณความเร็วให้ค่อยๆ ช้าลง (Linear Deceleration)
+        // แต่จะไม่หยุดจนกว่าจะกดกระโดด หรือเปลี่ยนทิศทาง (WASD)
+        float speedPercent = slideTimer / slideDuration;
+        float speed = Mathf.Lerp(walkSpeed, currentSlideSpeed, speedPercent);
+
+        // ค่อยๆ ลด slideTimer แต่หยุดที่ 0 (ไม่ให้มัน Stop อัตโนมัติใน HandleSliding นี้)
+        if (slideTimer > 0) slideTimer -= Time.deltaTime;
+
+        characterController.Move(transform.forward * speed * Time.deltaTime);
+        
+        // เพิ่มแรงกดตัวลงพื้นแรงๆ (Ground Glue) เฉพาะตอนสไลด์ เพื่อให้สามารถสไลด์ลงบันได/ทางลาดได้ไม่หลุด
+        characterController.Move(Vector3.down * 15f * Time.deltaTime);
+
+        // เงื่อนไขการออกจาก Slide: กดกระโดด หรือ ปล่อยปุ่มเดินหน้า
+        // สำหรับพื้น ใช้ Raycast เช็คระยะที่ไกลขึ้นนิดนึง (0.6f) เพื่อให้สไลด์ลงทางลาดได้ลื่นไหล
+        bool hasStoppedMovingForward = Input.GetAxisRaw("Vertical") <= 0;
+        bool isCloseToGround = Physics.Raycast(transform.position, Vector3.down, (characterController.height / 2f) + 0.6f);
+
+        if (Input.GetButtonDown("Jump") || hasStoppedMovingForward || !isCloseToGround)
+        {
+            StopSlide();
+            if (Input.GetButtonDown("Jump")) 
+            {
+                velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                PlaySound(jumpSound);
+            }
+        }
+    }
+
+    void StopSlide()
+    {
+        isSliding = false;
+        characterController.height = originalHeight;
+        characterController.center = originalCenter;
+    }
+    #endregion
+
+    #region Wall Running System
+    void CheckForWall()
+    {
+        // เพิ่มระยะห่างในการตรวจจับกำแพงเมื่อกำลัง Wall Running อยู่ (Hysteresis)
+        // เพื่อป้องกันการที่สถานะ WallRun หลุดและเข้าใหม่สลับกันรัวๆ จนกล้องกระตุก
+        float checkDistance = isWallRunning ? wallDistance * 1.5f : wallDistance;
+
+        wallRight = Physics.Raycast(transform.position, transform.right, out rightHit, checkDistance, wallMask);
+        wallLeft = Physics.Raycast(transform.position, -transform.right, out leftHit, checkDistance, wallMask);
+    }
+
+    void HandleWallRunStart()
+    {
+        if (wallRunCooldownTimer > 0) return;
+
+        // เช็คความสูงจากพื้นด้วย Raycast เพื่อไม่ให้กด Wall Run ทับตอนเตี้ยๆ (ใกล้พื้น)
+        bool isHighEnough = !Physics.Raycast(transform.position, Vector3.down, minHeightToWallRun);
+
+        if ((wallLeft || wallRight) && !isGrounded && isHighEnough && Input.GetAxisRaw("Vertical") > 0)
+        {
+            isWallRunning = true;
+            
+            // รีเซ็ตแรงเฉื่อยเก่า (X, Z) เพื่อป้องกันอาการ "ไหล" หรือ "โดนดึง" ไปทิศทางอื่นขณะไต่กำแพง
+            velocity = Vector3.zero; 
+            
+            if (movementAudioSource != null && wallRunLoopSound != null)
+            {
+                movementAudioSource.clip = wallRunLoopSound;
+                movementAudioSource.loop = true;
+                movementAudioSource.Play();
+            }
+        }
+    }
+
+    void HandleWallRun()
+    {
+        // ใช้ Normal ของกำแพงที่ถูกต้องตามฝั่ง (ป้องกันการ Bug เมื่อเจอ 2 กำแพงพร้อมกัน)
+        RaycastHit activeHit = wallRight ? rightHit : leftHit;
+        Vector3 wallNormal = activeHit.normal;
+
+        Vector3 moveDir = Vector3.ProjectOnPlane(transform.forward, wallNormal);
+
+        // "วิ่งแล้วมันลงช้า แต่ถ้าอยู่เฉยจะลงเร็ว"
+        float verticalInput = Input.GetAxisRaw("Vertical");
+        float currentWallRunGravity = verticalInput > 0 ? wallRunGravity : gravity / 2f; 
+
+        // คำนวณความเร็วรวม: (วิ่งไปตามกำแพง) + (แรงดึงดูด)
+        Vector3 wallMove = moveDir * wallRunForce * verticalInput;
+        velocity.y = currentWallRunGravity;
+
+        // เพิ่มแรงผลักออกจากกำแพงนิดหน่อย เฉพาะเมื่อเราอยู่ใกล้กำแพงเกินไป (เพื่อไม่ให้เบียด SkinWidth)
+        Vector3 pushAway = Vector3.zero;
+        if (activeHit.distance < wallDistance) 
+        {
+            pushAway = wallNormal * 0.12f;
+        }
+
+        // รวมทิศทางการเคลื่อนที่ทั้งหมดเข้าด้วยกัน
+        characterController.Move((wallMove + pushAway + velocity) * Time.deltaTime);
+
+        if (!(wallLeft || wallRight) || isGrounded || verticalInput <= 0)
+        {
+            StopWallRun();
+        }
+    }
+
+    void HandleWallJump()
+    {
+        if (Input.GetButtonDown("Jump"))
+        {
+            RaycastHit activeHit = wallRight ? rightHit : leftHit;
+            Vector3 wallNormal = activeHit.normal;
+
+            // ดีดตัวออกมาแรงๆ (เพิ่มแรงฝั่ง WallNormal ให้มากขึ้น)
+            Vector3 jumpDir = (wallNormal * 1.5f + Vector3.up).normalized;
+            velocity = jumpDir * wallRunJumpForce;
+            
+            wallRunCooldownTimer = wallRunCooldown;
+            StopWallRun();
+            PlaySound(jumpSound);
+        }
+    }
+
+    void StopWallRun()
+    {
+        isWallRunning = false;
+        if (velocity.y < 0) velocity.y = 0; // รีเซ็ตความเร็วแนวตั้งเมื่อหลุด (ป้องกันการวูบ)
+        
+        if (movementAudioSource != null && movementAudioSource.clip == wallRunLoopSound)
+        {
+            movementAudioSource.Stop();
+            movementAudioSource.loop = false;
+        }
+    }
+#endregion
+
+    void PlaySound(AudioClip clip)
+    {
+        if (movementAudioSource != null && clip != null)
+        {
+            movementAudioSource.PlayOneShot(clip);
+        }
+    }
+
+    void HandleScreenEffectsVisibility()
+    {
+        if (speedBurstEffect != null) 
+            speedBurstEffect.SetActive(isDashing || isSliding);
+        
+        if (wallRunEffect != null)
+            wallRunEffect.SetActive(isWallRunning);
     }
 }
