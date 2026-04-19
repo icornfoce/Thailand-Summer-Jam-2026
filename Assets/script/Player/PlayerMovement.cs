@@ -27,9 +27,14 @@ public class PlayerMovement : MonoBehaviour
     public float strafeTiltAngle = 3f;
     public float dashTiltAngle = 10f;
     public float tiltTransitionSpeed = 6f;
+    [Tooltip("ระยะที่กล้องจะลดระดับลงมาเพื่อให้วิสัยทัศน์สมจริงเวลาสไลด์")]
+    public float cameraCrouchOffset = -0.8f;
+    [Tooltip("ความนุ่มนวลในการก้ม/เงยหน้ากลับ ของหล้อง")]
+    public float cameraCrouchSpeed = 12f;
 
     private Camera camComponent;
     private float currentTilt = 0f;
+    private float originalCameraLocalY;
 
     private CharacterController characterController;
     private Vector3 velocity;
@@ -95,6 +100,7 @@ public class PlayerMovement : MonoBehaviour
         {
             camComponent = playerCamera.GetComponent<Camera>();
             if (camComponent != null) camComponent.fieldOfView = baseFOV;
+            originalCameraLocalY = playerCamera.localPosition.y;
         }
 
         originalHeight = characterController.height;
@@ -118,6 +124,7 @@ public class PlayerMovement : MonoBehaviour
         {
             HandleWallRun();
             HandleWallJump();
+            HandleSlidingInput(); // เปิดให้กดสไลด์แทรกลงมาจากกำแพงได้ทันที
         }
         else if (isSliding)
         {
@@ -172,9 +179,9 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleCameraEffects()
     {
-        if (camComponent == null) return;
+        if (camComponent == null || playerCamera == null) return;
 
-        // --- ระบบยืด/หด FOV ตามความเร็ว ---
+        // --- ระบบยืด/หด FOV ---
         float targetFOV = baseFOV;
         
         if (isDashing || isSliding)
@@ -191,6 +198,13 @@ public class PlayerMovement : MonoBehaviour
         }
 
         camComponent.fieldOfView = Mathf.Lerp(camComponent.fieldOfView, targetFOV, fovTransitionSpeed * Time.deltaTime);
+
+        // --- ระบบย่อกล้องลงตอนสไลด์ (Smooth Crouch) ---
+        // ถ้ากำลังสไลด์ เป้าหมายคือกล้องต่ำลง ถ้ากลับปกติหรือถูกขัดจังหวะ เป้าหมายคือจุดเดิม
+        float targetCameraY = isSliding ? originalCameraLocalY + cameraCrouchOffset : originalCameraLocalY;
+        Vector3 camLocalPos = playerCamera.localPosition;
+        camLocalPos.y = Mathf.Lerp(camLocalPos.y, targetCameraY, cameraCrouchSpeed * Time.deltaTime);
+        playerCamera.localPosition = camLocalPos;
     }
 
     void HandleMovement()
@@ -261,9 +275,9 @@ public class PlayerMovement : MonoBehaviour
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
 
-        // ให้ dash อิงตามมุมมองของกล้องเพื่อให้พุ่งขึ้นฟ้า/ลงดินได้ตามอิสระ
-        Transform camTransform = playerCamera != null ? playerCamera : transform;
-        Vector3 move = camTransform.right * x + camTransform.forward * z;
+        // ให้ dash อิงตามลำตัวของผู้เล่น (แกนระนาบพื้น) แทนกล้อง
+        // เพื่อป้องกันบั๊กการพุ่งขึ้นฟ้าเวลาเราก้มมองพื้นแล้วกดเดินถอยหลัง
+        Vector3 move = transform.right * x + transform.forward * z;
 
         if (move.magnitude > 0.1f)
         {
@@ -271,8 +285,8 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            // ถ้าไม่ได้กดปุ่มเดิน จะพุ่งไปตามที่กล้องมองตรงๆ
-            dashDirection = camTransform.forward;
+            // ถ้าไม่ได้กดปุ่มทิศทางใดๆ ให้พุ่งไปข้างหน้าของลำตัว
+            dashDirection = transform.forward;
         }
     }
 
@@ -299,8 +313,12 @@ public class PlayerMovement : MonoBehaviour
         // เช็คปุ่ม Ctrl หรือ C และต้องเดินหน้าอยู่ (W)
         bool slideKeyPressed = Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.C);
         
-        if (slideKeyPressed && Input.GetAxisRaw("Vertical") > 0 && isGrounded && !isSliding)
+        // อนุญาตให้เริ่มสไลด์ได้ ถ้าอยู่บนพื้นปกติ หรือกำลังวิ่งไต่กำแพงอยู่ (Aerial Slide)
+        bool canSlide = (isGrounded || isWallRunning) && !isSliding;
+
+        if (slideKeyPressed && Input.GetAxisRaw("Vertical") > 0 && canSlide)
         {
+            if (isWallRunning) StopWallRun(); // ยกเลิกการเกาะกำแพง แล้วทิ้งตัวสไลด์ลงพื้นอย่างเร็ว
             StartSlide();
         }
     }
@@ -330,17 +348,32 @@ public class PlayerMovement : MonoBehaviour
 
         slideTimer -= Time.deltaTime;
 
-        characterController.Move(transform.forward * currentSpeed * Time.deltaTime);
-        
-        // เพิ่มแรงกดตัวลงพื้นแรงๆ (Ground Glue) เพื่อสไลด์ลงบันได/ทางลาดได้ไม่หลุด
-        characterController.Move(Vector3.down * 15f * Time.deltaTime);
+        // คำนวณแนวพุ่งสไลด์
+        Vector3 slideMomentum = transform.forward * currentSpeed;
+
+        // จัดการตกพื้น (ตั้งค่า Ground Glue เพื่อรักษาให้ไถลลงทางลาดได้เนียนๆ)
+        if (isGrounded)
+        {
+            velocity.y = -10f; // แรงสำหรับกดให้แนบซอก/เนินลาด
+        }
+        else
+        {
+            // ถ้าสไลด์ร่วงจากกำแพงหรืออยู่ในอากาศ ก็ให้ตกลงมาตามแรงดึงดูดธรรมชาติ
+            velocity.y += gravity * Time.deltaTime;
+        }
+
+        slideMomentum.y = velocity.y;
+
+        // ต้องสั่ง Move() แค่ครั้งเดียวในการขยับ! 
+        // ถ้ารวม 2 แกนเข้าด้วยกันก่อน Move ระบบ Step Offset (ปีนเนินเตี้ยๆอัตโนมัติ) ถึงจะทำงานอย่างสมบูรณ์
+        characterController.Move(slideMomentum * Time.deltaTime);
 
         // เงื่อนไขการออกจาก Slide
         bool hasStoppedMovingForward = Input.GetAxisRaw("Vertical") <= 0;
-        bool isCloseToGround = Physics.Raycast(transform.position, Vector3.down, (characterController.height / 2f) + 0.6f);
 
-        // หยุดสไลด์เมื่อ: จบระยะเวลาสไลด์ตามกำหนด, กดกระโดด, ปล่อยปุ่มเดิน หรือตัวลอยจากพื้น
-        if (slideTimer <= 0f || Input.GetButtonDown("Jump") || hasStoppedMovingForward || !isCloseToGround)
+        // หยุดสไลด์เมื่อ: จบระยะเวลาสไลด์ตามกำหนด, กดกระโดด, หรือปล่อยปุ่มเดิน 
+        // (ยกเลิกการบังคับหลุดเมื่อไม่โดนพื้น เพื่อให้สไลด์ดิ่งลงมาจากกำแพงหรือสไลด์เหินฟ้าต่อได้ชั่วคราว)
+        if (slideTimer <= 0f || Input.GetButtonDown("Jump") || hasStoppedMovingForward)
         {
             StopSlide();
             if (Input.GetButtonDown("Jump")) 
@@ -381,8 +414,11 @@ public class PlayerMovement : MonoBehaviour
         {
             isWallRunning = true;
             
-            // รีเซ็ตแรงเฉื่อยเก่า (X, Z) เพื่อป้องกันอาการ "ไหล" หรือ "โดนดึง" ไปทิศทางอื่นขณะไต่กำแพง
-            velocity = Vector3.zero; 
+            // รีเซ็ตแรงแนวราบ แต่กั๊กความเร็วพุ่งขึ้น (Y) เอาไว้ 
+            // ทำให้กระโดดอัดกำแพงเพื่อไต่สูงขึ้นต่อได้ลื่นไหล ไม่ชะงักหยุดกึกแบบเวอร์ชันเก่า
+            velocity.x = 0;
+            velocity.z = 0;
+            if (velocity.y < 0) velocity.y = 0; // ถ้าตัวกำลังตก ให้หยุดร่วง
             
             if (movementAudioSource != null && wallRunLoopSound != null)
             {
