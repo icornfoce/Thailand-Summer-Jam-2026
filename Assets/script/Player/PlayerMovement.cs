@@ -278,10 +278,16 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleDash()
     {
-        // ยกเลิกข้อจำกัดแรงโน้มถ่วงชั่วคราวตอนพุ่ง
-        characterController.Move(dashDirection * dashForce * Time.deltaTime);
+        // คำนวณเปอร์เซ็นต์เวลาพุ่ง (0.0 ถึง 1.0)
+        float dashProgress = (Time.time - dashTime) / dashDuration;
+        
+        // ความเร็วค่อยๆ ลดลงจากแรงพุ่งไปสู่ความเร็วเดินปกติ
+        float currentDashSpeed = Mathf.Lerp(dashForce, walkSpeed, dashProgress);
 
-        if (Time.time >= dashTime + dashDuration)
+        // ยกเลิกข้อจำกัดแรงโน้มถ่วงชั่วคราวตอนพุ่ง
+        characterController.Move(dashDirection * currentDashSpeed * Time.deltaTime);
+
+        if (dashProgress >= 1f)
         {
             isDashing = false;
         }
@@ -316,25 +322,25 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleSliding()
     {
-        // คำนวณความเร็วให้ค่อยๆ ช้าลง (Linear Deceleration)
-        // แต่จะไม่หยุดจนกว่าจะกดกระโดด หรือเปลี่ยนทิศทาง (WASD)
-        float speedPercent = slideTimer / slideDuration;
-        float speed = Mathf.Lerp(walkSpeed, currentSlideSpeed, speedPercent);
-
-        // ค่อยๆ ลด slideTimer แต่หยุดที่ 0 (ไม่ให้มัน Stop อัตโนมัติใน HandleSliding นี้)
-        if (slideTimer > 0) slideTimer -= Time.deltaTime;
-
-        characterController.Move(transform.forward * speed * Time.deltaTime);
+        // คำนวณเปอร์เซ็นต์เวลาสไลด์ (0.0 ถึง 1.0)
+        float slideProgress = 1f - (slideTimer / slideDuration);
         
-        // เพิ่มแรงกดตัวลงพื้นแรงๆ (Ground Glue) เฉพาะตอนสไลด์ เพื่อให้สามารถสไลด์ลงบันได/ทางลาดได้ไม่หลุด
+        // ความเร็วค่อยๆ ลดลงจากแรงสไลด์ไปสู่ความเร็วเดินปกติ (ใช้วิธีเดียวกับ Dash)
+        float currentSpeed = Mathf.Lerp(slideForce, walkSpeed, slideProgress);
+
+        slideTimer -= Time.deltaTime;
+
+        characterController.Move(transform.forward * currentSpeed * Time.deltaTime);
+        
+        // เพิ่มแรงกดตัวลงพื้นแรงๆ (Ground Glue) เพื่อสไลด์ลงบันได/ทางลาดได้ไม่หลุด
         characterController.Move(Vector3.down * 15f * Time.deltaTime);
 
-        // เงื่อนไขการออกจาก Slide: กดกระโดด หรือ ปล่อยปุ่มเดินหน้า
-        // สำหรับพื้น ใช้ Raycast เช็คระยะที่ไกลขึ้นนิดนึง (0.6f) เพื่อให้สไลด์ลงทางลาดได้ลื่นไหล
+        // เงื่อนไขการออกจาก Slide
         bool hasStoppedMovingForward = Input.GetAxisRaw("Vertical") <= 0;
         bool isCloseToGround = Physics.Raycast(transform.position, Vector3.down, (characterController.height / 2f) + 0.6f);
 
-        if (Input.GetButtonDown("Jump") || hasStoppedMovingForward || !isCloseToGround)
+        // หยุดสไลด์เมื่อ: จบระยะเวลาสไลด์ตามกำหนด, กดกระโดด, ปล่อยปุ่มเดิน หรือตัวลอยจากพื้น
+        if (slideTimer <= 0f || Input.GetButtonDown("Jump") || hasStoppedMovingForward || !isCloseToGround)
         {
             StopSlide();
             if (Input.GetButtonDown("Jump")) 
