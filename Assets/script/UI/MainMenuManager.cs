@@ -45,6 +45,7 @@ public class MainMenuManager : MonoBehaviour
     // Private fields
     // ─────────────────────────────────────────────────────────
     private Resolution[] resolutions;
+    private bool isSettingsOpen = false;
 
     // ─────────────────────────────────────────────────────────
     // Start() — Initialize everything
@@ -80,8 +81,38 @@ public class MainMenuManager : MonoBehaviour
         // ── Setup resolution dropdown ──
         SetupResolutionDropdown();
 
+        // ── Setup Audio Source (auto-create if not assigned) ──
+        if (sfxSource == null)
+        {
+            sfxSource = GetComponent<AudioSource>();
+            if (sfxSource == null)
+            {
+                sfxSource = gameObject.AddComponent<AudioSource>();
+                sfxSource.playOnAwake = false;
+                Debug.Log("MainMenuManager: AudioSource was not assigned, created one automatically.");
+            }
+        }
+
+        if (hoverSFX == null)
+            Debug.LogWarning("MainMenuManager: 'hoverSFX' is not assigned! Hover sound will not play. Drag an AudioClip into the Inspector.");
+
+        if (clickSFX == null)
+            Debug.LogWarning("MainMenuManager: 'clickSFX' is not assigned! Click sound will not play. Drag an AudioClip into the Inspector.");
+
         // ── Setup Button Effects ──
         SetupButtonEffects();
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // Update() — Handle Escape key to close Settings
+    // ─────────────────────────────────────────────────────────
+    void Update()
+    {
+        // Press Escape to close settings panel (backup close method)
+        if (isSettingsOpen && Input.GetKeyDown(KeyCode.Escape))
+        {
+            OnToggleSettings();
+        }
     }
 
     // ═════════════════════════════════════════════════════════
@@ -117,10 +148,14 @@ public class MainMenuManager : MonoBehaviour
     {
         if (settingsPanel == null) return;
 
-        bool isActive = settingsPanel.activeSelf;
-        settingsPanel.SetActive(!isActive);
+        isSettingsOpen = !isSettingsOpen;
+        settingsPanel.SetActive(isSettingsOpen);
 
-        Debug.Log("Settings panel: " + (!isActive ? "Opened" : "Closed"));
+        // Deselect the current button so it can be clicked again
+        if (EventSystem.current != null)
+            EventSystem.current.SetSelectedGameObject(null);
+
+        Debug.Log("Settings panel: " + (isSettingsOpen ? "Opened" : "Closed"));
     }
 
     /// <summary>
@@ -129,7 +164,10 @@ public class MainMenuManager : MonoBehaviour
     public void OnOpenSettings()
     {
         if (settingsPanel != null)
+        {
             settingsPanel.SetActive(true);
+            isSettingsOpen = true;
+        }
     }
 
     /// <summary>
@@ -138,7 +176,14 @@ public class MainMenuManager : MonoBehaviour
     public void OnCloseSettings()
     {
         if (settingsPanel != null)
+        {
             settingsPanel.SetActive(false);
+            isSettingsOpen = false;
+        }
+
+        // Deselect so buttons reset properly
+        if (EventSystem.current != null)
+            EventSystem.current.SetSelectedGameObject(null);
     }
 
     // ═══════════════════════════════════════════════════════
@@ -436,7 +481,7 @@ public class MainMenuManager : MonoBehaviour
             if (button != null && !button.interactable) return;
 
             targetScale = originalScale * manager.hoverScaleSize;
-            if (buttonGraphic != null) targetColor = manager.hoverFadeColor;
+            if (buttonGraphic != null) targetColor = originalColor * manager.hoverFadeColor;
 
             if (manager.hoverSFX != null && manager.sfxSource != null)
             {
@@ -455,6 +500,10 @@ public class MainMenuManager : MonoBehaviour
         {
             if (manager.clickSFX != null && manager.sfxSource != null)
                 manager.sfxSource.PlayOneShot(manager.clickSFX);
+
+            // Deselect button after click so it can be clicked again immediately
+            if (EventSystem.current != null)
+                EventSystem.current.SetSelectedGameObject(null);
         }
     }
 }
