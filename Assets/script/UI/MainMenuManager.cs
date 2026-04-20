@@ -15,6 +15,7 @@ public class MainMenuManager : MonoBehaviour
     [Header("Panels")]
     public GameObject mainMenuPanel;        // (Optional) Drag MainMenu container here for fade effect
     public GameObject settingsPanel;        // Drag SettingsPanel here
+    public GameObject helpPanel;            // Drag HelpPanel here
     public GameObject confirmQuitPanel;     // (Optional) Drag ConfirmQuitPanel here
 
     [Header("Scene to Load")]
@@ -48,6 +49,8 @@ public class MainMenuManager : MonoBehaviour
     private Resolution[] resolutions;
     private bool isSettingsOpen = false;
     private Coroutine settingsFadeCoroutine;
+    private bool isHelpOpen = false;
+    private Coroutine helpFadeCoroutine;
     private Coroutine mainMenuFadeCoroutine;
     private float settingsFadeSpeed = 0.3f; // ความเร็วในการเปิดปิดหน้าต่าง Setting
 
@@ -59,6 +62,9 @@ public class MainMenuManager : MonoBehaviour
         // Hide panels at start
         if (settingsPanel != null)
             settingsPanel.SetActive(false);
+
+        if (helpPanel != null)
+            helpPanel.SetActive(false);
 
         if (confirmQuitPanel != null)
             confirmQuitPanel.SetActive(false);
@@ -112,10 +118,14 @@ public class MainMenuManager : MonoBehaviour
     // ─────────────────────────────────────────────────────────
     void Update()
     {
-        // Press Escape to close settings panel (backup close method)
+        // Press Escape to close settings/help panel (backup close method)
         if (isSettingsOpen && Input.GetKeyDown(KeyCode.Escape))
         {
             OnToggleSettings();
+        }
+        else if (isHelpOpen && Input.GetKeyDown(KeyCode.Escape))
+        {
+            OnToggleHelp();
         }
     }
 
@@ -185,7 +195,7 @@ public class MainMenuManager : MonoBehaviour
         if (cgSettings != null)
         {
             if (settingsFadeCoroutine != null) StopCoroutine(settingsFadeCoroutine);
-            settingsFadeCoroutine = StartCoroutine(FadeSettingsPanel(cgSettings, cgSettings.alpha, 1f, true));
+            settingsFadeCoroutine = StartCoroutine(FadePanel(cgSettings, cgSettings.alpha, 1f, true));
         }
 
         // ทำให้ Main Menu เฟดออก
@@ -221,7 +231,7 @@ public class MainMenuManager : MonoBehaviour
         if (cgSettings != null)
         {
             if (settingsFadeCoroutine != null) StopCoroutine(settingsFadeCoroutine);
-            settingsFadeCoroutine = StartCoroutine(FadeSettingsPanel(cgSettings, cgSettings.alpha, 0f, false));
+            settingsFadeCoroutine = StartCoroutine(FadePanel(cgSettings, cgSettings.alpha, 0f, false));
         }
         else
         {
@@ -244,10 +254,111 @@ public class MainMenuManager : MonoBehaviour
             EventSystem.current.SetSelectedGameObject(null);
     }
 
+    // ═════════════════════════════════════════════════════════
+    //  HELP BUTTON
+    // ═════════════════════════════════════════════════════════
+
     /// <summary>
-    /// Coroutine สำหรับค่อยๆ Fade โชว์และซ่อน Settings Panel
+    /// Toggles the help panel open/closed.
     /// </summary>
-    private IEnumerator FadeSettingsPanel(CanvasGroup cg, float startAlpha, float endAlpha, bool isOpen)
+    public void OnToggleHelp()
+    {
+        Debug.Log("OnToggleHelp called!"); 
+
+        if (helpPanel == null)
+        {
+            Debug.LogError("MainMenuManager: helpPanel ไม่ได้ถูกใส่ไว้ในช่อง Inspector!");
+            return;
+        }
+
+        if (isHelpOpen)
+        {
+            OnCloseHelp();
+        }
+        else
+        {
+            OnOpenHelp();
+        }
+        
+        Debug.Log("Help panel is now: " + (isHelpOpen ? "Opened" : "Closed"));
+    }
+
+    /// <summary>
+    /// Opens the help panel.
+    /// </summary>
+    public void OnOpenHelp()
+    {
+        if (helpPanel == null) return;
+        
+        isHelpOpen = true;
+        helpPanel.SetActive(true);
+
+        CanvasGroup cgHelp = helpPanel.GetComponent<CanvasGroup>();
+        if (cgHelp != null)
+        {
+            if (helpFadeCoroutine != null) StopCoroutine(helpFadeCoroutine);
+            helpFadeCoroutine = StartCoroutine(FadePanel(cgHelp, cgHelp.alpha, 1f, true));
+        }
+
+        // ทำให้ Main Menu เฟดออก
+        if (mainMenuPanel != null)
+        {
+            CanvasGroup cgMain = mainMenuPanel.GetComponent<CanvasGroup>();
+            if (cgMain != null)
+            {
+                if (mainMenuFadeCoroutine != null) StopCoroutine(mainMenuFadeCoroutine);
+                mainMenuFadeCoroutine = StartCoroutine(FadeMainMenuPanel(cgMain, cgMain.alpha, 0f, false));
+            }
+            else
+            {
+                mainMenuPanel.SetActive(false); // ถ้าไม่มี CanvasGroup ให้เซ็ตปิดไปเลย
+            }
+        }
+
+        if (EventSystem.current != null)
+            EventSystem.current.SetSelectedGameObject(null);
+    }
+
+    /// <summary>
+    /// Closes the help panel.
+    /// </summary>
+    public void OnCloseHelp()
+    {
+        if (helpPanel == null) return;
+
+        isHelpOpen = false;
+
+        CanvasGroup cgHelp = helpPanel.GetComponent<CanvasGroup>();
+        if (cgHelp != null)
+        {
+            if (helpFadeCoroutine != null) StopCoroutine(helpFadeCoroutine);
+            helpFadeCoroutine = StartCoroutine(FadePanel(cgHelp, cgHelp.alpha, 0f, false));
+        }
+        else
+        {
+            helpPanel.SetActive(false); // ถ้าไม่มี CanvasGroup ให้ปิดทันที
+        }
+
+        // ทำให้ Main Menu เฟดเข้ากลับมาที่เดิม
+        if (mainMenuPanel != null)
+        {
+            mainMenuPanel.SetActive(true);
+            CanvasGroup cgMain = mainMenuPanel.GetComponent<CanvasGroup>();
+            if (cgMain != null)
+            {
+                if (mainMenuFadeCoroutine != null) StopCoroutine(mainMenuFadeCoroutine);
+                mainMenuFadeCoroutine = StartCoroutine(FadeMainMenuPanel(cgMain, cgMain.alpha, 1f, true));
+            }
+        }
+
+        if (EventSystem.current != null)
+            EventSystem.current.SetSelectedGameObject(null);
+    }
+
+    /// <summary>
+    /// Coroutine สำหรับค่อยๆ Fade โชว์และซ่อน Panel แบบทั่วไป
+    /// </summary>
+    private IEnumerator FadePanel(CanvasGroup cg, float startAlpha, float endAlpha, bool isOpen)
     {
         float timer = 0f;
         cg.interactable = false; // ป้องกันผู้เล่นกดปุ่มรัวๆ ในขณะที่หน้าจอกำลังเฟด
@@ -268,7 +379,7 @@ public class MainMenuManager : MonoBehaviour
         }
         else
         {
-            settingsPanel.SetActive(false); // ตอนปิด พอเฟดเสร็จ ให้ปิด Active ทิ้งเพื่อไม่ให้กินทรัพยากร
+            cg.gameObject.SetActive(false); // ตอนปิด พอเฟดเสร็จ ให้ปิด Active ทิ้งเพื่อไม่ให้กินทรัพยากร
         }
     }
 
