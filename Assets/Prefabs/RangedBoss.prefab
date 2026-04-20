@@ -158,6 +158,7 @@ GameObject:
   - component: {fileID: 7814327837931656401}
   - component: {fileID: 5327065303259602998}
   - component: {fileID: 2600871392899405006}
+  - component: {fileID: 3322235142951834006}
   m_Layer: 0
   m_Name: RangedBoss
   m_TagString: Untagged
@@ -319,6 +320,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47f6c92d573f35e44ac5161f27bb208a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  maxHealth: 30
-  healAmountOnDeath: 15
+  maxHealth: 300
+  healAmountOnDeath: 100
   deathSfx: {fileID: 0}
+  deathVfxPrefabs:
+  - {fileID: 9219224891226368304, guid: 041ebb84f2cc12243945f4af1ea807a4, type: 3}
+  - {fileID: 5584110830163523526, guid: 13ceee0397dd46e47847136ad9e4a930, type: 3}
+  - {fileID: 8968931039128315033, guid: 5b013a5f3e59bc041bb8519af3d69bd5, type: 3}
+  - {fileID: 1579386999982182373, guid: 7fa5488df578bbc49be2792fe4a6bf1a, type: 3}
+  - {fileID: 6906549681873197354, guid: ff5196ea1de4cfd4b98c3382f7256b88, type: 3}
+  - {fileID: 2288528421430685569, guid: 56776ffdc08e5384186d40db123ea2bf, type: 3}
+  - {fileID: 5318651383541416288, guid: abf6b33fe5e470a4daed374e95447647, type: 3}
+  - {fileID: 8864740788002753386, guid: c17a7111230ea584a851b12d64d98a4b, type: 3}
+  - {fileID: 1079701600893449744, guid: 1c3f70bc825c71840828cf13713804de, type: 3}
+  - {fileID: 3567194948137786635, guid: a6ff00100871cd647aeae0459e956bcb, type: 3}
+--- !u!114 &3322235142951834006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9204608788144256446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7aa8fb2fc6eee642b82c6ffaa7f6a2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossDrop
+  itemPrefab: {fileID: 5805877415649761519, guid: f703662770279904bb7e28b99f236672, type: 3}
+  dropHeightOffset: 0.5
