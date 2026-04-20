@@ -169,7 +169,7 @@ NavMeshAgent:
   m_AutoBraking: 1
   m_AutoRepath: 1
   m_Height: 1.28
-  m_BaseOffset: 1
+  m_BaseOffset: 1.14
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
 --- !u!114 &4629829913815686036
@@ -184,7 +184,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 191b882c4a32dee4a8c3da52ce22ec24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RangedEnemy
-  speed: 3
+  speed: 5
   stoppingDistance: 10
   retreatDistance: 10
   attackDamage: 10
