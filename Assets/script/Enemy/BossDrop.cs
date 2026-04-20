@@ -9,8 +9,13 @@ public class BossDrop : MonoBehaviour
     [Tooltip("How high above the boss's center the item should drop.")]
     public float dropHeightOffset = 0.5f;
 
+    [HideInInspector]
+    public bool canDrop = true;
+
     public void DropItem()
     {
+        if (!canDrop) return;
+
         if (itemPrefab != null)
         {
             // Calculate drop position with offset

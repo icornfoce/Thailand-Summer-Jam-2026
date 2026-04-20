@@ -175,7 +175,7 @@ Transform:
   m_GameObject: {fileID: 9204608788144256446}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.992458, z: -0, w: 0.12258562}
-  m_LocalPosition: {x: 228.12, y: 2.67, z: 278.37}
+  m_LocalPosition: {x: 228.12, y: 2.77, z: 278.37}
   m_LocalScale: {x: 2.1909094, y: 2.7803998, z: 1.8833572}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -298,7 +298,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RangedEnemy
   speed: 7
-  stoppingDistance: 20
+  stoppingDistance: 10
   retreatDistance: 20
   attackDamage: 25
   attackRange: 20
@@ -347,4 +347,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossDrop
   itemPrefab: {fileID: 5805877415649761519, guid: f703662770279904bb7e28b99f236672, type: 3}
-  dropHeightOffset: 0.5
+  dropHeightOffset: 0.1

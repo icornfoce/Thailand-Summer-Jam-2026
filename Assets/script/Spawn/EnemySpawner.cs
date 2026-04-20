@@ -23,9 +23,22 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("ถ้าติ๊ก ระบบจะรอให้ศัตรูในเวฟปัจจุบันตายหมดก่อน จึงจะเริ่มนับเวลาไปเวฟใหม่")]
     public bool waitToClearEnemies = true;
 
+    [Header("Difficulty Settings")]
+    [Tooltip("เลือดของศัตรูที่จะบวกเพิ่มขึ้นในแต่ละเวฟ (เช่น เวฟละ 10)")]
+    public int bonusHealthPerWave = 10;
+
     [Header("Spawn Settings")]
     [Tooltip("ใส่ Prefab ของตัวศัตรูที่ต้องการให้เกิด")]
     public GameObject[] enemyPrefabs;
+
+    [Tooltip("ใส่ Prefab ของ Boss (สุ่มเกิด 1 ตัวในเวฟที่เป็นบอส)")]
+    public GameObject[] bossPrefabs;
+
+    [Tooltip("บอสจะเกิดทุกๆ กี่เวฟ (ค่าเริ่มต้น 10 = เวฟ 10, 20, 30...)")]
+    public int bossWaveInterval = 10;
+    
+    [Tooltip("จำนวนบอสที่จะเพิ่มขึ้นในแต่ละรอบบอส (เช่น รอบ 1=1 ตัว, รอบ 2=2 ตัว)")]
+    public int bossIncreasePerBossWave = 1;
     
     [Tooltip("ใส่บล็อค หรือ Transform ที่ต้องการให้ศัตรูเกิดตรงนี้")]
     public Transform[] spawnPoints;
@@ -39,6 +52,9 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("จำกัดจำนวนศัตรูสูงสุดในฉากที่เกิดจาก Spawner นี้ (0 = ไม่จำกัด)")]
     public int maxEnemiesAtOnce = 5;
 
+    [Tooltip("จำนวนที่บวกเพิ่มให้กับขีดจำกัดศัตรูสูงสุดในแต่ละเวฟ")]
+    public int maxEnemiesIncreasePerWave = 1;
+
     [Tooltip("ให้ศัตรูเกิดแบบอัตโนมัติหรือไม่")]
     public bool spawnAutomatically = true;
 
@@ -46,6 +62,7 @@ public class EnemySpawner : MonoBehaviour
     private int currentWaveIndex = 0;
     private List<GameObject> activeEnemies = new List<GameObject>();
     private bool isSpawningWave = false;
+    private bool hasSpawnedFirstBoss = false;
 
     void Start()
     {
@@ -86,18 +103,47 @@ public class EnemySpawner : MonoBehaviour
             int enemiesForThisWave = initialEnemyCount + (enemyIncreasePerWave * (currentWaveIndex - 1));
             int enemiesSpawnedInWave = 0;
             
-            // วนลูปเกิดศัตรูจนกว่าจะครบกำหนดในเวฟนั้น
-            while (enemiesSpawnedInWave < enemiesForThisWave)
+            bool isBossWave = (bossPrefabs != null && bossPrefabs.Length > 0 && bossWaveInterval > 0 && currentWaveIndex % bossWaveInterval == 0);
+            
+            int bossesToSpawn = 0;
+            int bossesSpawnedInWave = 0;
+
+            if (isBossWave)
+            {
+                // คำนวณว่าต้องเกิดบอสกี่ตัว
+                int bossWaveRound = currentWaveIndex / bossWaveInterval;
+                bossesToSpawn = 1 + (bossIncreasePerBossWave * (bossWaveRound - 1));
+            }
+
+            // คำนวณขีดจำกัดศัตรูสูงสุดในฉากสำหรับเวฟนี้
+            int currentMaxEnemies = maxEnemiesAtOnce;
+            if (maxEnemiesAtOnce > 0)
+            {
+                currentMaxEnemies += (maxEnemiesIncreasePerWave * (currentWaveIndex - 1));
+            }
+
+            // วนลูปเกิดศัตรูหรือบอสจนกว่าจะครบกำหนดในเวฟนั้น
+            while (enemiesSpawnedInWave < enemiesForThisWave || bossesSpawnedInWave < bossesToSpawn)
             {
                 // ถ้าจำกัดจำนวนและเกิดเต็มแม็กซ์แล้ว ให้หยุดรอจนกว่าจะมีศัตรูตาย
-                if (maxEnemiesAtOnce > 0 && activeEnemies.Count >= maxEnemiesAtOnce)
+                if (currentMaxEnemies > 0 && activeEnemies.Count >= currentMaxEnemies)
                 {
                     yield return null; // รอเฟรมถัดไป
                     continue;
                 }
 
-                SpawnEnemy();
-                enemiesSpawnedInWave++;
+                // สุ่มเกิดบอสก่อน ถ้าบอสยังไม่ครบ
+                if (isBossWave && bossesSpawnedInWave < bossesToSpawn)
+                {
+                    SpawnBoss();
+                    bossesSpawnedInWave++;
+                }
+                // ถ้าบอสครบแล้ว หรือไม่ใช่เวฟบอส ให้เกิดศัตรูแทน
+                else if (enemiesSpawnedInWave < enemiesForThisWave)
+                {
+                    SpawnEnemy();
+                    enemiesSpawnedInWave++;
+                }
                 
                 // รอระยะเวลาก่อนเกิดตัวถัดไปในเวฟ
                 yield return new WaitForSeconds(spawnInterval);
@@ -129,6 +175,48 @@ public class EnemySpawner : MonoBehaviour
             Debug.Log("จบครบทุกเวฟที่กำหนดใน Spawner แล้ว!");
         }
         isSpawningWave = false;
+    }
+
+    public void SpawnBoss()
+    {
+        if (bossPrefabs == null || bossPrefabs.Length == 0) return;
+        if (spawnPoints.Length == 0) return;
+
+        int spawnIndex = Random.Range(0, spawnPoints.Length);
+        Transform selectedSpawnPoint = spawnPoints[spawnIndex];
+
+        int bossIndex = Random.Range(0, bossPrefabs.Length);
+        GameObject selectedBossPrefab = bossPrefabs[bossIndex];
+
+        Vector2 randomCircle = Random.insideUnitCircle * spawnRadius;
+        Vector3 randomOffset = new Vector3(randomCircle.x, 0, randomCircle.y);
+        Vector3 spawnPosition = selectedSpawnPoint.position + randomOffset + Vector3.up * spawnHeightOffset;
+
+        GameObject newBoss = Instantiate(selectedBossPrefab, spawnPosition, selectedSpawnPoint.rotation);
+        
+        EnemyHealth healthScript = newBoss.GetComponent<EnemyHealth>();
+        if (healthScript != null && currentWaveIndex > 1)
+        {
+            // บวกเลือดบอสตามสเกลเดียวกับศัตรูทั่วไป หรือถ้าอยากแก้สเกลทีหลังก็แก้ตรงนี้ได้
+            int bonusHealth = bonusHealthPerWave * (currentWaveIndex - 1);
+            healthScript.ApplyBonusHealth(bonusHealth);
+        }
+
+        // จัดการเรื่องดรอปไอเทม (ให้ดรอปแค่ตัวแรกที่เกิดเท่านั้น)
+        if (hasSpawnedFirstBoss)
+        {
+            BossDrop dropScript = newBoss.GetComponent<BossDrop>();
+            if (dropScript != null)
+            {
+                dropScript.canDrop = false; // ปิดการดรอปสำหรับบอสตัวต่อๆ ไป
+            }
+        }
+        else
+        {
+            hasSpawnedFirstBoss = true; // บันทึกว่าบอสตัวแรกเกิดแล้ว
+        }
+
+        activeEnemies.Add(newBoss);
     }
 
     public void SpawnEnemy()
@@ -163,6 +251,14 @@ public class EnemySpawner : MonoBehaviour
         // สร้างศัตรูในฉาก
         GameObject newEnemy = Instantiate(selectedEnemyPrefab, spawnPosition, selectedSpawnPoint.rotation);
         
+        // เพิ่มเลือดให้ศัตรูตามเวฟปัจจุบัน (ลบ 1 เพื่อให้เวฟแรกสุดมีเลือดเท่าเดิม)
+        EnemyHealth healthScript = newEnemy.GetComponent<EnemyHealth>();
+        if (healthScript != null && currentWaveIndex > 1)
+        {
+            int bonusHealth = bonusHealthPerWave * (currentWaveIndex - 1);
+            healthScript.ApplyBonusHealth(bonusHealth);
+        }
+
         // เก็บศัตรูไว้ในลิสต์เพื่อติดตามจำนวนที่อยู่ในฉากปัจจุบัน
         activeEnemies.Add(newEnemy);
         

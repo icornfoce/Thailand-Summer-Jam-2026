@@ -18,6 +18,13 @@ public class EnemyHealth : MonoBehaviour
         currentHealth = maxHealth;
     }
 
+    // ฟังก์ชันนี้ใช้สำหรับเพิ่มเลือดสูงสุดให้ศัตรู (มักถูกเรียกใช้จาก EnemySpawner)
+    public void ApplyBonusHealth(int bonus)
+    {
+        maxHealth += bonus;
+        currentHealth = maxHealth;
+    }
+
     public void TakeDamage(int damage)
     {
         if (currentHealth <= 0) return;
