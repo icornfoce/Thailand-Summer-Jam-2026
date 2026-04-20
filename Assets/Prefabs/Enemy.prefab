@@ -45,7 +45,7 @@ GameObject:
   - component: {fileID: 3912544420077769499}
   - component: {fileID: 9009582920722042767}
   - component: {fileID: 3114310717651205039}
-  - component: {fileID: 6035693212986853183}
+  - component: {fileID: -245362360908827689}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -195,7 +195,7 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &6035693212986853183
+--- !u!114 &-245362360908827689
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -208,8 +208,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
   maxHealth: 30
-  healAmountOnDeath: 15
+  healAmountOnDeath: 10
   deathSfx: {fileID: 0}
+  deathVfxPrefabs:
+  - {fileID: 9219224891226368304, guid: 041ebb84f2cc12243945f4af1ea807a4, type: 3}
+  - {fileID: 5584110830163523526, guid: 13ceee0397dd46e47847136ad9e4a930, type: 3}
+  - {fileID: 8968931039128315033, guid: 5b013a5f3e59bc041bb8519af3d69bd5, type: 3}
+  - {fileID: 1579386999982182373, guid: 7fa5488df578bbc49be2792fe4a6bf1a, type: 3}
+  - {fileID: 6906549681873197354, guid: ff5196ea1de4cfd4b98c3382f7256b88, type: 3}
+  - {fileID: 2288528421430685569, guid: 56776ffdc08e5384186d40db123ea2bf, type: 3}
+  - {fileID: 5318651383541416288, guid: abf6b33fe5e470a4daed374e95447647, type: 3}
+  - {fileID: 8864740788002753386, guid: c17a7111230ea584a851b12d64d98a4b, type: 3}
+  - {fileID: 1079701600893449744, guid: 1c3f70bc825c71840828cf13713804de, type: 3}
+  - {fileID: 3567194948137786635, guid: a6ff00100871cd647aeae0459e956bcb, type: 3}
 --- !u!1 &4938446636321292273
 GameObject:
   m_ObjectHideFlags: 0

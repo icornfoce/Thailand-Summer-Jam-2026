@@ -8,8 +8,10 @@ public class EnemyHealth : MonoBehaviour
     [Header("Reward Settings")]
     public int healAmountOnDeath = 15; // คืนเลือด/แสงสว่างให้ศัตรูตอนตาย (Core Mechanic)
 
-    [Header("Audio")]
+    [Header("Audio & Visuals")]
     public AudioClip deathSfx;
+    [Tooltip("List of VFX prefabs to spawn randomly on death.")]
+    public GameObject[] deathVfxPrefabs;
 
     void Start()
     {
@@ -40,7 +42,23 @@ public class EnemyHealth : MonoBehaviour
             playerHealth.Heal(healAmountOnDeath);
         }
 
-        // TODO: สั่งเล่น Effect เลือดสาดตรงนี้ในอนาคต
+        // เช็คว่ามีสคริปต์ BossDrop หรือไม่ ถ้ามีให้ดรอปไอเทม
+        BossDrop bossDrop = GetComponent<BossDrop>();
+        if (bossDrop != null)
+        {
+            bossDrop.DropItem();
+        }
+
+        // สุ่มเล่น Effect เลือดสาด/ตาย
+        if (deathVfxPrefabs != null && deathVfxPrefabs.Length > 0)
+        {
+            int randomIndex = Random.Range(0, deathVfxPrefabs.Length);
+            GameObject selectedVfx = deathVfxPrefabs[randomIndex];
+            if (selectedVfx != null)
+            {
+                Instantiate(selectedVfx, transform.position, Quaternion.identity);
+            }
+        }
 
         if (deathSfx != null)
         {

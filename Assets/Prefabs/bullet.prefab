@@ -127,7 +127,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyProjectile
   damage: 10
-  lifetime: 10
+  lifetime: 3
 --- !u!54 &1578130223662674645
 Rigidbody:
   m_ObjectHideFlags: 0
