@@ -3,10 +3,13 @@ Shader "UI/HPBarFade"
     Properties
     {
         [PerRendererData] _MainTex ("Texture", 2D) = "white" {}
-        _Color ("Tint", Color) = (1,1,1,1)
+        _LeftColor ("สีฝั่งซ้าย", Color) = (1,1,1,1)
+        _RightColor ("สีฝั่งขวา", Color) = (1,0,0,1)
+        _Color ("Tint (ตัวคูณสี)", Color) = (1,1,1,1)
+        
         _Cutoff ("Cutoff (0=เต็ม, 1=หมด)", Range(0,1)) = 0
-        _FadeWidth ("ความกว้างขอบเบลอ", Range(0.01, 0.3)) = 0.08
-
+        _FadeWidth ("ความกว้างขอบจาง", Range(0.01, 1.0)) = 0.4
+        
         // Unity UI Stencil
         _StencilComp ("Stencil Comparison", Float) = 8
         _Stencil ("Stencil ID", Float) = 0
@@ -36,10 +39,7 @@ Shader "UI/HPBarFade"
             WriteMask [_StencilWriteMask]
         }
 
-        Cull Off
-        Lighting Off
-        ZWrite Off
-        ZTest [unity_GUIZTestMode]
+        Cull Off Lighting Off ZWrite Off ZTest [unity_GUIZTestMode]
         Blend SrcAlpha OneMinusSrcAlpha
         ColorMask [_ColorMask]
 
@@ -65,7 +65,8 @@ Shader "UI/HPBarFade"
             };
 
             sampler2D _MainTex;
-            float4 _MainTex_ST;
+            fixed4 _LeftColor;
+            fixed4 _RightColor;
             fixed4 _Color;
             float _Cutoff;
             float _FadeWidth;
@@ -81,12 +82,12 @@ Shader "UI/HPBarFade"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                fixed4 col = tex2D(_MainTex, i.uv) * i.color;
+                // ผสมสี Gradient จากซ้ายไปขวา
+                fixed4 gradColor = lerp(_LeftColor, _RightColor, i.uv.x);
+                fixed4 col = tex2D(_MainTex, i.uv) * gradColor * i.color;
 
-                // ขยาย cutoff เล็กน้อยเพื่อให้ cutoff=1 ทำให้หายหมดจริงๆ
+                // คำนวณความจางจากขวาไปซ้าย
                 float adjustedCutoff = _Cutoff * (1.0 + _FadeWidth);
-
-                // smoothstep ทำให้ขอบจางนุ่มนวล (เบลอ) จากขวาไปซ้าย
                 float fadeAlpha = smoothstep(adjustedCutoff - _FadeWidth, adjustedCutoff, 1.0 - i.uv.x);
                 col.a *= fadeAlpha;
 

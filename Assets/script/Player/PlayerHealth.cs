@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -13,20 +14,56 @@ public class PlayerHealth : MonoBehaviour
     public float timePerHpDrop = 1f;
     private float decayTimer;
 
+    [Header("UI Visual Settings (คุมแถบเลือด)")]
+    public RawImage hpFullImage;
+    [Tooltip("ความเร็วในการไหลลดลงของแถบเลือด (เลื่อยๆ)")]
+    [Range(0.1f, 5f)]
+    public float smoothHPSpeed = 1f;
+    [Tooltip("ความกว้างของการจางหาย (0=คม, 1=จางมาก)")]
+    [Range(0.01f, 1f)]
+    public float hpFadeWidth = 0.4f;
+
+    [Header("Gradient Colors")]
+    public Color colorLeft = Color.white;
+    public Color colorRight = Color.red;
+
+    private Material fadeMaterial;
+    private float targetCutoff = 0f; // 0 = เต็ม, 1 = หมด
+    private float currentCutoff = 0f;
+
     [Header("Events")]
-    public UnityEvent<int, int> OnHealthChanged; // ส่งค่า (เลือดปัจจุบัน, เลือดสูงสุด) ไปอัปเดต UI ได้
+    public UnityEvent<int, int> OnHealthChanged; 
     public UnityEvent OnTakeDamage;
     public UnityEvent OnPlayerDeath;
 
     void Start()
     {
         currentHealth = maxHealth;
-        OnHealthChanged?.Invoke(currentHealth, maxHealth); // ส่งให้ UI ตอนเริ่มเกม
+        OnHealthChanged?.Invoke(currentHealth, maxHealth); 
+
+        // --- ตั้งค่า Shader (ไม่ต้องตั้ง Read/Write Enabled แล้ว) ---
+        if (hpFullImage != null)
+        {
+            Shader fadeShader = Shader.Find("UI/HPBarFade");
+            if (fadeShader != null)
+            {
+                // สร้าง Material ใหม่จาก Shader
+                fadeMaterial = new Material(fadeShader);
+                fadeMaterial.SetTexture("_MainTex", hpFullImage.texture);
+                hpFullImage.material = fadeMaterial;
+                
+                UpdateMaterialProperties();
+            }
+            else
+            {
+                Debug.LogError("หา Shader 'UI/HPBarFade' ไม่เจอ! ตรวจสอบว่าไฟล์ HPBarFade.shader ยังอยู่ดีไหมครับ");
+            }
+        }
     }
 
     void Update()
     {
-        // ระบบเลือดลดตลอดเวลา (สไตล์เลือดค่อยๆ หมด)
+        // 1. ระบบ HP Decay
         if (enableHpDecay && currentHealth > 0)
         {
             decayTimer += Time.deltaTime;
@@ -36,60 +73,68 @@ public class PlayerHealth : MonoBehaviour
                 DrainHealth(1);
             }
         }
+
+        // 2. ระบบ UI อัปเดตแถบเลือดผ่าน Shader (เลื่อยๆ)
+        if (fadeMaterial != null)
+        {
+            currentCutoff = Mathf.MoveTowards(currentCutoff, targetCutoff, smoothHPSpeed * Time.deltaTime);
+            UpdateMaterialProperties();
+        }
     }
 
-    // สำหรับใช้หักเลือดเงียบๆ โดยไม่ถือว่าโดนโจมตี (ไม่มี Effect ร้องเจ็บ)
+    private void UpdateMaterialProperties()
+    {
+        if (fadeMaterial == null) return;
+
+        // ส่งค่าไปยัง Shader
+        fadeMaterial.SetFloat("_Cutoff", currentCutoff);
+        fadeMaterial.SetFloat("_FadeWidth", hpFadeWidth);
+        fadeMaterial.SetColor("_LeftColor", colorLeft);
+        fadeMaterial.SetColor("_RightColor", colorRight);
+    }
+
     public void DrainHealth(int amount)
     {
         if (currentHealth <= 0) return;
-
         currentHealth -= amount;
-        
-        if (currentHealth <= 0)
-        {
-            currentHealth = 0;
-            Die();
-        }
-
+        if (currentHealth <= 0) { currentHealth = 0; Die(); }
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        UpdateTargetCutoff();
     }
 
-    // ฟังก์ชันสำหรับรับความเสียหาย (เอาไปผูกกับศัตรู/กับดัก)
     public void TakeDamage(int amount)
     {
-        if (currentHealth <= 0) return; // ถ้าตายแล้ว ไม่ต้องทำอะไร
-
+        if (currentHealth <= 0) return; 
         currentHealth -= amount;
-        OnTakeDamage?.Invoke(); // สั่งให้เกิดเอฟเฟกต์/เสียงตอนโดนตี
-
-        if (currentHealth <= 0)
-        {
-            currentHealth = 0;
-            Die();
-        }
-
+        OnTakeDamage?.Invoke(); 
+        if (currentHealth <= 0) { currentHealth = 0; Die(); }
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
-        Debug.Log($"Player took {amount} damage! Current Health: {currentHealth}");
+        UpdateTargetCutoff();
     }
 
-    // ฟังก์ชันสำหรับเพิ่มเลือด (เอาไปผูกกับเวลาฆ่าศัตรูตายตามคอนเซปต์เกม)
     public void Heal(int amount)
     {
-        if (currentHealth <= 0) return; // ตายแล้วเพิ่มเลือดไม่ได้เว้นแต่จะใช้ระบบชุบ
-
+        if (currentHealth <= 0) return; 
         currentHealth += amount;
-        if (currentHealth > maxHealth)
-        {
-            currentHealth = maxHealth;
-        }
-
+        if (currentHealth > maxHealth) currentHealth = maxHealth;
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
-        Debug.Log($"Player healed for {amount}! Current Health: {currentHealth}");
+        UpdateTargetCutoff();
+    }
+
+    private void UpdateTargetCutoff()
+    {
+        if (maxHealth > 0)
+            targetCutoff = 1f - ((float)currentHealth / maxHealth);
     }
 
     private void Die()
     {
         Debug.Log("Player has died!");
-        OnPlayerDeath?.Invoke(); // ใช้เรียกหน้าต่าง Game Over
+        OnPlayerDeath?.Invoke(); 
+    }
+
+    void OnDestroy()
+    {
+        if (fadeMaterial != null) Destroy(fadeMaterial);
     }
 }
