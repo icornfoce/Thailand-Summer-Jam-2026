@@ -86,8 +86,8 @@ Shader "UI/HPBarFade"
                 // ขยาย cutoff เล็กน้อยเพื่อให้ cutoff=1 ทำให้หายหมดจริงๆ
                 float adjustedCutoff = _Cutoff * (1.0 + _FadeWidth);
 
-                // smoothstep ทำให้ขอบจางนุ่มนวล (เบลอ) แทนที่จะตัดคมเป็นเส้นตรง
-                float fadeAlpha = smoothstep(adjustedCutoff - _FadeWidth, adjustedCutoff, i.uv.x);
+                // smoothstep ทำให้ขอบจางนุ่มนวล (เบลอ) จากขวาไปซ้าย
+                float fadeAlpha = smoothstep(adjustedCutoff - _FadeWidth, adjustedCutoff, 1.0 - i.uv.x);
                 col.a *= fadeAlpha;
 
                 return col;
