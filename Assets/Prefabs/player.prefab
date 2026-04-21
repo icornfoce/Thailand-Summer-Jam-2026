@@ -42017,6 +42017,8 @@ GameObject:
   - component: {fileID: 8069046555037870523}
   - component: {fileID: 7004376534404418292}
   - component: {fileID: 7209652560951341594}
+  - component: {fileID: 5224992374309380439}
+  - component: {fileID: 445557030677614750}
   m_Layer: 0
   m_Name: player
   m_TagString: Player
@@ -42353,3 +42355,69 @@ MonoBehaviour:
   sciFiPistol: {fileID: 3806502035103235324}
   sciFiSMG: {fileID: 5805877415649761519}
   railgun: {fileID: 3855092806092672841}
+--- !u!114 &5224992374309380439
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8987219472832182696}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84b1a58a05ae92049b5835fd87f7e0d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeleeFist
+  punchKey: 102
+  playerCamera: {fileID: 0}
+  meleeVisualObject: {fileID: 0}
+  meleeAnimator: {fileID: 0}
+  punchTriggerName: Punch
+  visualShowDuration: 0.5
+  punchRange: 3
+  punchRadius: 0.5
+  damage: 30
+  punchCooldown: 0.3
+  hitstopTimeScale: 0.05
+  hitstopDuration: 0.2
+  reflectSpeed: 40
+  parryHitstopTimeScale: 0.02
+  parryHitstopDuration: 0.3
+  hpCostPerPunch: 0
+  punchHitVFX: {fileID: 0}
+  parryVFX: {fileID: 0}
+  punchSwingSFX: {fileID: 0}
+  punchHitSFX: {fileID: 0}
+  parrySFX: {fileID: 0}
+--- !u!114 &445557030677614750
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8987219472832182696}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84b1a58a05ae92049b5835fd87f7e0d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeleeFist
+  punchKey: 102
+  playerCamera: {fileID: 0}
+  meleeVisualObject: {fileID: 0}
+  meleeAnimator: {fileID: 0}
+  punchTriggerName: Punch
+  visualShowDuration: 0.5
+  punchRange: 3
+  punchRadius: 0.5
+  damage: 30
+  punchCooldown: 0.3
+  hitstopTimeScale: 0.05
+  hitstopDuration: 0.2
+  reflectSpeed: 40
+  parryHitstopTimeScale: 0.02
+  parryHitstopDuration: 0.3
+  hpCostPerPunch: 0
+  punchHitVFX: {fileID: 0}
+  parryVFX: {fileID: 0}
+  punchSwingSFX: {fileID: 0}
+  punchHitSFX: {fileID: 0}
+  parrySFX: {fileID: 0}

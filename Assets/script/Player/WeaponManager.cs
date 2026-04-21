@@ -9,7 +9,7 @@ using System.Collections.Generic;
 public class WeaponManager : MonoBehaviour
 {
     [Header("=== Weapon Slots ===")]
-    [Tooltip("ปืนเริ่มต้น — มีตั้งแต่เริ่มเกม (Slot 1 เสมอ)")]
+    [Tooltip("ปืน NoobGun — ได้เมื่อเก็บ Pickup")]
     public GameObject noobGun;
 
     [Tooltip("ปืน Sci-Fi Pistol — ได้เมื่อเก็บ Pickup")]
@@ -34,7 +34,7 @@ public class WeaponManager : MonoBehaviour
     };
 
     // ─────────────────────────────────────────────────────────
-    //  Start — NoobGun เป็น Slot [1] เสมอ
+    //  Start — เริ่มต้นมายังไม่มีปืนเลย (ผู้เล่นต้องไปเก็บเอง)
     // ─────────────────────────────────────────────────────────
     void Start()
     {
@@ -42,12 +42,7 @@ public class WeaponManager : MonoBehaviour
         SetWeapon(sciFiPistol, false);
         SetWeapon(sciFiSMG,    false);
         SetWeapon(railgun,     false);
-
-        if (noobGun != null)
-        {
-            collectedWeapons.Add(noobGun);
-            SwitchToIndex(0);
-        }
+        // Player เริ่มด้วยมือเปล่า (ไม่มีปืน) จนกว่าจะเก็บ Pickup ได้
     }
 
     // ─────────────────────────────────────────────────────────
