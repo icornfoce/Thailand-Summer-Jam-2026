@@ -323,7 +323,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 072fd3a262ae977448881f4e63fa511e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
-  speed: 5
+  speed: 17
   attackRange: 3.68
   attackCooldown: 3
   attackDamage: 10
@@ -348,3 +348,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossDrop
   itemPrefab: {fileID: 884978925183725488, guid: 3f1bb73539491074390d7c31c72d7354, type: 3}
   dropHeightOffset: 0.1
+  canDrop: 1

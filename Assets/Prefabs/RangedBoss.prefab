@@ -297,8 +297,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 191b882c4a32dee4a8c3da52ce22ec24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RangedEnemy
-  speed: 7
-  stoppingDistance: 10
+  speed: 14
+  stoppingDistance: 30
   retreatDistance: 20
   attackDamage: 25
   attackRange: 20

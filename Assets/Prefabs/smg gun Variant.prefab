@@ -78,7 +78,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GunController
   playerCamera: {fileID: 0}
-  damage: 15
+  damage: 5
   range: 150
   hpCostPerShot: 2
   isAutoFire: 1

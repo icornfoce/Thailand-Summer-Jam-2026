@@ -162,7 +162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 072fd3a262ae977448881f4e63fa511e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
-  speed: 7
+  speed: 15
   attackRange: 1.5
   attackCooldown: 1
   attackDamage: 10
@@ -183,7 +183,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.50000006
-  m_Speed: 3.5
+  m_Speed: 14
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -208,7 +208,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
   maxHealth: 30
-  healAmountOnDeath: 10
+  healAmountOnDeath: 30
   deathSfx: {fileID: 0}
   deathVfxPrefabs:
   - {fileID: 9219224891226368304, guid: 041ebb84f2cc12243945f4af1ea807a4, type: 3}

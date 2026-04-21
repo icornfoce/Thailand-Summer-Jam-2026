@@ -184,15 +184,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 191b882c4a32dee4a8c3da52ce22ec24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RangedEnemy
-  speed: 5
-  stoppingDistance: 10
+  speed: 12
+  stoppingDistance: 20
   retreatDistance: 10
   attackDamage: 10
   attackRange: 10
   fireRate: 1.5
   projectilePrefab: {fileID: 1295413968245911341, guid: 4573595c14895e54097e96a613c05437, type: 3}
   firePoint: {fileID: 8557163946152502059}
-  projectileSpeed: 40
+  projectileSpeed: 50
   attackSfx: {fileID: 0}
   attackVfx: {fileID: 0}
 --- !u!114 &4930668097554147972
@@ -208,7 +208,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
   maxHealth: 30
-  healAmountOnDeath: 10
+  healAmountOnDeath: 30
   deathSfx: {fileID: 0}
   deathVfxPrefabs:
   - {fileID: 9219224891226368304, guid: 041ebb84f2cc12243945f4af1ea807a4, type: 3}
