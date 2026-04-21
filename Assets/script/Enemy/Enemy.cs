@@ -6,6 +6,7 @@ public class Enemy : MonoBehaviour
 {
     [Header("Movement")]
     public float speed = 3f;
+    public float rotationSpeed = 720f;
     
     [Header("Combat")]
     public float attackRange = 1.5f;
@@ -29,6 +30,7 @@ public class Enemy : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         agent.speed = speed;
+        agent.updateRotation = false;
 
         // Find the player object using its tag
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -56,6 +58,13 @@ public class Enemy : MonoBehaviour
             Vector3 direction = (playerTransform.position - transform.position).normalized;
             direction.y = 0; // Ignore the Y-axis 
 
+            // Manually rotate towards the player at all times
+            if (direction != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            }
+
             // Check if player is within attack range
             if (distanceToPlayer <= attackRange)
             {
@@ -63,12 +72,6 @@ public class Enemy : MonoBehaviour
                 if (agent.isOnNavMesh)
                 {
                     agent.isStopped = true;
-                }
-                
-                // Make the enemy face the player
-                if (direction != Vector3.zero)
-                {
-                    transform.forward = direction;
                 }
                 
                 // Check if attack cooldown has finished

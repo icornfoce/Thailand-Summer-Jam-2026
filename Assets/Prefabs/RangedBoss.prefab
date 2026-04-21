@@ -300,12 +300,12 @@ MonoBehaviour:
   speed: 14
   stoppingDistance: 30
   retreatDistance: 20
-  attackDamage: 25
-  attackRange: 20
+  attackDamage: 30
+  attackRange: 30
   fireRate: 3
   projectilePrefab: {fileID: 1295413968245911341, guid: 43cb95c2079afe44fa12dd81635f1289, type: 3}
   firePoint: {fileID: 1430669035117063683}
-  projectileSpeed: 50
+  projectileSpeed: 70
   attackSfx: {fileID: 0}
   attackVfx: {fileID: 0}
 --- !u!114 &5128111033931133951

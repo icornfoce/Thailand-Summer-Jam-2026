@@ -1453,7 +1453,7 @@ Transform:
   m_GameObject: {fileID: 878746714}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.81}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1475,8 +1475,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
   totalWaves: 100
-  initialEnemyCount: 1
-  enemyIncreasePerWave: 0
+  initialEnemyCount: 3
+  enemyIncreasePerWave: 1
   spawnInterval: 3
   timeBetweenWaves: 5
   waitToClearEnemies: 1
@@ -1491,10 +1491,8 @@ MonoBehaviour:
   bossIncreasePerBossWave: 1
   spawnPoints:
   - {fileID: 1507074511}
-  - {fileID: 873649818}
-  - {fileID: 782002738}
   spawnHeightOffset: 1
-  spawnRadius: 5
+  spawnRadius: 7.15
   maxEnemiesAtOnce: 10
   maxEnemiesIncreasePerWave: 1
   spawnAutomatically: 1
@@ -3011,8 +3009,8 @@ Transform:
   m_GameObject: {fileID: 1507074510}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.66, y: 0, z: -0.52}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 17.75, y: 0, z: 3.72}
+  m_LocalScale: {x: 1.0141, y: 1.0141, z: 1.0141}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 878746715}

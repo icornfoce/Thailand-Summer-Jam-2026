@@ -6,6 +6,7 @@ public class RangedEnemy : MonoBehaviour
 {
     [Header("Movement")]
     public float speed = 3f;
+    public float rotationSpeed = 720f;
     public float stoppingDistance = 8f; // The distance at which the enemy will stop moving towards the player
     public float retreatDistance = 5f; // The distance at which the enemy will start backing away
     
@@ -16,6 +17,7 @@ public class RangedEnemy : MonoBehaviour
     public GameObject projectilePrefab; // The sphere prefab to shoot
     public Transform firePoint; // Where the projectile spawns
     public float projectileSpeed = 10f; // Speed of the projectile
+    public float predictionIntensity = 1f; // How much to lead the shot (0 = no prediction, 1 = full prediction)
     
     [Header("Audio & Visuals")]
     public AudioClip attackSfx;
@@ -48,22 +50,33 @@ public class RangedEnemy : MonoBehaviour
         // If the player exists, track them
         if (playerTransform != null)
         {
-            // Calculate direction to player
-            Vector3 direction = (playerTransform.position - transform.position).normalized;
-            
-            // Ignore the Y-axis so the enemy doesn't try to fly up or burrow into the ground
-            direction.y = 0;
-
-            // Make the enemy face the player (even when stopped or retreating)
-            if (direction != Vector3.zero)
-            {
-                transform.forward = direction;
-            }
-
             // Calculate distance to player (ignoring Y axis height difference)
             Vector3 flatPlayerPos = new Vector3(playerTransform.position.x, 0, playerTransform.position.z);
             Vector3 flatEnemyPos = new Vector3(transform.position.x, 0, transform.position.z);
             float distanceToPlayer = Vector3.Distance(flatEnemyPos, flatPlayerPos);
+
+            // --- Predictive Tracking ---
+            Vector3 targetPosition = playerTransform.position;
+            
+            // Get player velocity to predict where they will be
+            CharacterController playerCc = playerTransform.GetComponent<CharacterController>();
+            if (playerCc != null && predictionIntensity > 0)
+            {
+                // Simple prediction: Target = CurrentPos + (Velocity * TimeToReach)
+                float travelTime = distanceToPlayer / projectileSpeed;
+                targetPosition += playerCc.velocity * travelTime * predictionIntensity;
+            }
+
+            // Calculate direction to the (possibly predicted) position
+            Vector3 direction = (targetPosition - transform.position).normalized;
+            direction.y = 0;
+
+            // Smoothly rotate towards the target
+            if (direction != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            }
 
             // Move towards player if too far
             if (distanceToPlayer > stoppingDistance)
@@ -128,11 +141,8 @@ public class RangedEnemy : MonoBehaviour
         Rigidbody projRb = projectile.GetComponent<Rigidbody>();
         if (projRb != null)
         {
-            // Calculate a precise aim direction towards the player's center
-            Vector3 aimDirection = (playerTransform.position - firePoint.position).normalized;
-            
-            // Apply velocity to the projectile using linearVelocity
-            projRb.linearVelocity = aimDirection * projectileSpeed;
+            // Use firePoint's forward which is already aiming at the (predicted) player position
+            projRb.linearVelocity = firePoint.forward * projectileSpeed;
         }
         else
         {
