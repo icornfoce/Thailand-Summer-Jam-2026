@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   totalAmmo: 25
   magazineSize: 5
-  reloadDuration: 8
+  reloadDuration: 0
   shootDelay: 1
   bulletSpeed: 6000
   fireRate: 0.2

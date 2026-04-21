@@ -15,7 +15,7 @@ public class WeaponPickup : MonoBehaviour
         NoobGun,
         SciFiPistol,
         SciFiSMG,
-        // เพิ่ม Enum ใหม่ตรงนี้ถ้ามีปืนเพิ่ม
+        Railgun,
     }
 
     [Header("=== Pickup Settings ===")]
@@ -75,6 +75,10 @@ public class WeaponPickup : MonoBehaviour
 
             case WeaponType.SciFiSMG:
                 weaponManager.EquipSciFiSMG();
+                break;
+
+            case WeaponType.Railgun:
+                weaponManager.EquipRailgun();
                 break;
         }
 

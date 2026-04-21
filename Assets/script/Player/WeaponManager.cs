@@ -1,85 +1,114 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 /// <summary>
 /// ติดบน Player Root Object
-/// จัดการการเปิด/ปิด GameObject ของปืนแต่ละกระบอก
-/// ปืนทั้งหมดต้องเป็น Children ของ Player และ Disable ไว้ใน Inspector ยกเว้น NoobGun
+/// ระบบปืนแบบ Dynamic Slot — หมายเลขปืนจะเรียงตามลำดับที่เก็บมา
+/// กด 1/2/3 เพื่อสลับปืนในลิสต์
 /// </summary>
 public class WeaponManager : MonoBehaviour
 {
     [Header("=== Weapon Slots ===")]
-    [Tooltip("ปืนเริ่มต้น (เปิดตั้งแต่เริ่มเกม)")]
+    [Tooltip("ปืนเริ่มต้น — มีตั้งแต่เริ่มเกม (Slot 1 เสมอ)")]
     public GameObject noobGun;
 
-    [Tooltip("ปืน Sci-Fi Pistol (ปิดไว้ก่อน)")]
+    [Tooltip("ปืน Sci-Fi Pistol — ได้เมื่อเก็บ Pickup")]
     public GameObject sciFiPistol;
 
-    [Tooltip("ปืน Sci-Fi SMG (ปิดไว้ก่อน)")]
+    [Tooltip("ปืน Sci-Fi SMG — ได้เมื่อเก็บ Pickup")]
     public GameObject sciFiSMG;
 
-    // เพิ่มปืนใหม่ตรงนี้ได้เลย
-    // public GameObject sciFiShotgun;
+    [Tooltip("ปืน Railgun — ได้เมื่อเก็บ Pickup")]
+    public GameObject railgun;
 
     // ─────────────────────────────────────────────────────────
-    //  Start — เปิดแค่ NoobGun, ปิดปืนที่เหลือทั้งหมด
+    //  Dynamic Weapon List — เรียงตามลำดับที่เก็บ
+    // ─────────────────────────────────────────────────────────
+    private List<GameObject> collectedWeapons = new List<GameObject>();
+    private int currentIndex = 0;
+
+    private readonly KeyCode[] numberKeys = new KeyCode[]
+    {
+        KeyCode.Alpha1, KeyCode.Alpha2, KeyCode.Alpha3,
+        KeyCode.Alpha4, KeyCode.Alpha5, KeyCode.Alpha6,
+    };
+
+    // ─────────────────────────────────────────────────────────
+    //  Start — NoobGun เป็น Slot [1] เสมอ
     // ─────────────────────────────────────────────────────────
     void Start()
     {
-        EquipNoobGun();
+        SetWeapon(noobGun,     false);
+        SetWeapon(sciFiPistol, false);
+        SetWeapon(sciFiSMG,    false);
+        SetWeapon(railgun,     false);
+
+        if (noobGun != null)
+        {
+            collectedWeapons.Add(noobGun);
+            SwitchToIndex(0);
+        }
     }
 
     // ─────────────────────────────────────────────────────────
-    //  Public API — เรียกจาก WeaponPickup
+    //  Update — กด 1/2/3 สลับปืน
     // ─────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// เปิด NoobGun, ปิดปืนอื่นทั้งหมด
-    /// </summary>
-    public void EquipNoobGun()
+    void Update()
     {
-        SetAllWeapons(false);
-        SetWeapon(noobGun, true);
-        Debug.Log("[WeaponManager] Equipped: NoobGun");
-    }
-
-    /// <summary>
-    /// เปิด Sci-Fi Pistol, ปิดปืนอื่นทั้งหมด
-    /// </summary>
-    public void EquipSciFiPistol()
-    {
-        SetAllWeapons(false);
-        SetWeapon(sciFiPistol, true);
-        Debug.Log("[WeaponManager] Equipped: Sci-Fi Pistol");
-    }
-
-    /// <summary>
-    /// เปิด Sci-Fi SMG, ปิดปืนอื่นทั้งหมด
-    /// </summary>
-    public void EquipSciFiSMG()
-    {
-        SetAllWeapons(false);
-        SetWeapon(sciFiSMG, true);
-        Debug.Log("[WeaponManager] Equipped: Sci-Fi SMG");
+        for (int i = 0; i < numberKeys.Length; i++)
+        {
+            if (Input.GetKeyDown(numberKeys[i]))
+            {
+                SwitchToIndex(i);
+                break;
+            }
+        }
     }
 
     // ─────────────────────────────────────────────────────────
-    //  Private Helpers
+    //  Public API — WeaponPickup เรียกเมื่อเก็บปืน
     // ─────────────────────────────────────────────────────────
 
-    /// <summary>
-    /// ปิด/เปิด GameObject ปืนทั้งหมดใน Slots
-    /// </summary>
-    private void SetAllWeapons(bool active)
+    public void EquipNoobGun()     => AddAndEquip(noobGun,     "NoobGun");
+    public void EquipSciFiPistol() => AddAndEquip(sciFiPistol, "Sci-Fi Pistol");
+    public void EquipSciFiSMG()    => AddAndEquip(sciFiSMG,    "Sci-Fi SMG");
+    public void EquipRailgun()     => AddAndEquip(railgun,     "Railgun");
+
+    // ─────────────────────────────────────────────────────────
+    //  Private — Unlock ปืน (ถ้ายังไม่มี) แล้วสวมทันที
+    // ─────────────────────────────────────────────────────────
+    private void AddAndEquip(GameObject weapon, string weaponName)
     {
-        SetWeapon(noobGun,      active);
-        SetWeapon(sciFiPistol,  active);
-        SetWeapon(sciFiSMG,     active);
-        // SetWeapon(sciFiShotgun, active);
+        if (weapon == null) return;
+
+        if (!collectedWeapons.Contains(weapon))
+        {
+            collectedWeapons.Add(weapon);
+            Debug.Log($"[WeaponManager] 🔓 Unlocked: {weaponName} → Slot [{collectedWeapons.Count}]");
+        }
+
+        SwitchToIndex(collectedWeapons.IndexOf(weapon));
     }
 
-    /// <summary>
-    /// ปิด/เปิด GameObject ปืนตัวเดียว (null-safe)
-    /// </summary>
+    // ─────────────────────────────────────────────────────────
+    //  Private — สลับไปปืน index ที่กำหนด
+    // ─────────────────────────────────────────────────────────
+    private void SwitchToIndex(int index)
+    {
+        if (index < 0 || index >= collectedWeapons.Count)
+        {
+            Debug.Log($"[WeaponManager] Slot [{index + 1}] ว่างอยู่ ยังไม่มีปืน");
+            return;
+        }
+
+        foreach (var w in collectedWeapons)
+            SetWeapon(w, false);
+
+        currentIndex = index;
+        SetWeapon(collectedWeapons[currentIndex], true);
+        Debug.Log($"[WeaponManager] 🔫 Slot [{index + 1}]: {collectedWeapons[index].name}");
+    }
+
     private void SetWeapon(GameObject weapon, bool active)
     {
         if (weapon != null)

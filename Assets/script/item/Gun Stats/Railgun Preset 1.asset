@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   totalAmmo: 48
   magazineSize: 12
-  reloadDuration: 8
+  reloadDuration: 0
   shootDelay: 4
   bulletSpeed: 6000
   fireRate: 0.1
-  fireMode: 1
+  fireMode: 0
   burstCount: 1
   burstInterval: 1
