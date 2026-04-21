@@ -159,7 +159,7 @@ GameObject:
   - component: {fileID: 2833779940059237921}
   - component: {fileID: 3210890978047817291}
   - component: {fileID: 2647372617675387694}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: MeleeBoss 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -351,6 +351,12 @@ MonoBehaviour:
   chargingBool: isCharging
   dashingBool: isDashing
   attackTrigger: Attack
+  chargeVfxPrefab: {fileID: 0}
+  dashVfxPrefab: {fileID: 0}
+  vfxPoint: {fileID: 0}
+  chargeSfx: {fileID: 0}
+  dashSfx: {fileID: 0}
+  attackSfx: {fileID: 0}
   playerLayer:
     serializedVersion: 2
     m_Bits: 8

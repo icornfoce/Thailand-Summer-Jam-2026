@@ -46,7 +46,7 @@ GameObject:
   - component: {fileID: 2474119574104584468}
   - component: {fileID: 4629829913815686036}
   - component: {fileID: 4930668097554147972}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: RangedEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -185,6 +185,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RangedEnemy
   speed: 12
+  rotationSpeed: 720
   stoppingDistance: 20
   retreatDistance: 10
   attackDamage: 10
@@ -193,6 +194,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 1295413968245911341, guid: 4573595c14895e54097e96a613c05437, type: 3}
   firePoint: {fileID: 8557163946152502059}
   projectileSpeed: 70
+  predictionIntensity: 1
   attackSfx: {fileID: 0}
   attackVfx: {fileID: 0}
 --- !u!114 &4930668097554147972

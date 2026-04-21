@@ -25,6 +25,14 @@ public class MeleeBoss : MonoBehaviour
     public string dashingBool = "isDashing";
     public string attackTrigger = "Attack";
 
+    [Header("Audio & Visuals")]
+    public GameObject chargeVfxPrefab;
+    public GameObject dashVfxPrefab;
+    public Transform vfxPoint;
+    public AudioClip chargeSfx;
+    public AudioClip dashSfx;
+    public AudioClip attackSfx;
+
     [Header("Detection")]
     public LayerMask playerLayer;
 
@@ -33,6 +41,7 @@ public class MeleeBoss : MonoBehaviour
     private BossState currentState = BossState.Chasing;
     private float stateTimer = 0f;
     private Vector3 dashDirection;
+    private GameObject currentChargeVfx;
 
     void Start()
     {
@@ -128,6 +137,20 @@ public class MeleeBoss : MonoBehaviour
         if (agent.isOnNavMesh) agent.isStopped = true;
         
         if (animator != null) animator.SetBool(chargingBool, true);
+
+        // Play Charge SFX
+        if (chargeSfx != null)
+        {
+            AudioSource.PlayClipAtPoint(chargeSfx, transform.position);
+        }
+
+        // Spawn Charge VFX
+        if (chargeVfxPrefab != null)
+        {
+            Transform spawnPoint = vfxPoint != null ? vfxPoint : transform;
+            currentChargeVfx = Instantiate(chargeVfxPrefab, spawnPoint.position, spawnPoint.rotation);
+            currentChargeVfx.transform.SetParent(spawnPoint); // Make it follow the boss
+        }
         
         Debug.Log("Boss is charging...");
     }
@@ -146,6 +169,24 @@ public class MeleeBoss : MonoBehaviour
     private void StartDashing()
     {
         currentState = BossState.Dashing;
+
+        // Cleanup Charge VFX
+        if (currentChargeVfx != null)
+        {
+            Destroy(currentChargeVfx);
+        }
+
+        // Spawn Dash VFX at current position (Teleport Out)
+        if (dashVfxPrefab != null)
+        {
+            Instantiate(dashVfxPrefab, transform.position, transform.rotation);
+        }
+
+        // Play Dash/Teleport SFX
+        if (dashSfx != null)
+        {
+            AudioSource.PlayClipAtPoint(dashSfx, transform.position);
+        }
         
         // --- Teleport Logic ---
         Vector3 targetPos = playerTransform.position;
@@ -160,6 +201,12 @@ public class MeleeBoss : MonoBehaviour
         {
             // Fallback: just move to player pos if NavMesh check fails
             transform.position = targetPos;
+        }
+
+        // Spawn Dash VFX at new position (Teleport In)
+        if (dashVfxPrefab != null)
+        {
+            Instantiate(dashVfxPrefab, transform.position, transform.rotation);
         }
 
         // Face the player after teleporting
@@ -195,6 +242,12 @@ public class MeleeBoss : MonoBehaviour
         {
             animator.SetBool(dashingBool, false);
             animator.SetTrigger(attackTrigger);
+        }
+
+        // Play Attack SFX
+        if (attackSfx != null)
+        {
+            AudioSource.PlayClipAtPoint(attackSfx, transform.position);
         }
 
         Debug.Log("Dash ended, boss cooling down.");
@@ -246,6 +299,13 @@ public class MeleeBoss : MonoBehaviour
     {
         stateTimer = Time.time + attackCooldown;
         if (animator != null) animator.SetTrigger(attackTrigger);
+        
+        // Play Attack SFX
+        if (attackSfx != null)
+        {
+            AudioSource.PlayClipAtPoint(attackSfx, transform.position);
+        }
+
         Debug.Log("Boss performs basic melee attack!");
         
         // Damage check for basic attack
