@@ -10550,10 +10550,12 @@ MonoBehaviour:
   hpCostPerShot: 15
   fireCooldown: 1.5
   beamPrefab: {fileID: 6154995089280665462, guid: b210611948cda5248b4bd24e0c86fb0f, type: 3}
-  beamLifetime: 2
+  beamLifetime: 0.7
   beamScale: 1
-  hitEffectPrefab: {fileID: 0}
+  hitEffectPrefab: {fileID: 4794043405585894037, guid: 253a6430fa6e3f349a8e81ea0ac85e55, type: 3}
   muzzlePoint: {fileID: 8000535767454511181}
+  shootSound: {fileID: 8300000, guid: c069d34968e79bd4d8ff69e06b1dca29, type: 3}
+  audioSource: {fileID: 0}
 --- !u!1 &4528289740731531794
 GameObject:
   m_ObjectHideFlags: 0

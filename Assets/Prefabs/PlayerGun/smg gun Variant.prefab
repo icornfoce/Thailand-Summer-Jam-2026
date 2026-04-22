@@ -83,3 +83,5 @@ MonoBehaviour:
   hpCostPerShot: 2
   isAutoFire: 1
   hitEffectPrefab: {fileID: 0}
+  shootSound: {fileID: 8300000, guid: daa56e19989211b4ead6acc3723db981, type: 3}
+  audioSource: {fileID: 0}

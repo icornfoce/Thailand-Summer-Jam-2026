@@ -46,6 +46,12 @@ public class RailgunController : MonoBehaviour
     [Tooltip("จุดปากกระบอกปืน (ถ้าไม่ใส่จะใช้ตำแหน่งของ script นี้)")]
     public Transform muzzlePoint;
 
+    [Header("=== Audio ===")]
+    [Tooltip("เสียงตอนยิง")]
+    public AudioClip shootSound;
+    [Tooltip("AudioSource สำหรับเล่นเสียง (ถ้าไม่ใส่จะเพิ่มให้อัตโนมัติ)")]
+    public AudioSource audioSource;
+
     // ──── Private References ────
     private Gun sciFiGun;
 
@@ -68,6 +74,14 @@ public class RailgunController : MonoBehaviour
         // Muzzle fallback
         if (muzzlePoint == null)
             muzzlePoint = transform;
+
+        // ค้นหาหรือสร้าง AudioSource
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
+                audioSource = gameObject.AddComponent<AudioSource>();
+        }
 
         // Subscribe: เมื่อ Sci-Fi Gun ยิงกระสุนออก → ทำ Railgun Beam
         sciFiGun.onBulletShot += OnRailgunFired;
@@ -116,7 +130,13 @@ public class RailgunController : MonoBehaviour
         if (playerHealth != null && hpCostPerShot > 0)
             playerHealth.DrainHealth(hpCostPerShot);
 
-        // 2. ยิง penetrating beam
+        // 2. เล่นเสียงยิง
+        if (shootSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(shootSound);
+        }
+
+        // 3. ยิง penetrating beam
         PerformPenetratingBeam();
     }
 

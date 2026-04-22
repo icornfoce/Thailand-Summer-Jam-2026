@@ -323,7 +323,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7aa8fb2fc6eee642b82c6ffaa7f6a2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossDrop
-  itemPrefab: {fileID: 884978925183725488, guid: 3f1bb73539491074390d7c31c72d7354, type: 3}
+  itemPrefab: {fileID: 884978925183725488, guid: 4def79acc67de094eb1638ee1614ce8e, type: 3}
   dropHeightOffset: 0.1
   canDrop: 1
 --- !u!114 &2647372617675387694

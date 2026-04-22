@@ -33,6 +33,12 @@ public class GunController : MonoBehaviour
     [Tooltip("Prefab เอฟเฟกต์ตอนกระสุนโดนผนัง/ศัตรู")]
     public GameObject hitEffectPrefab;
 
+    [Header("=== Audio ===")]
+    [Tooltip("เสียงตอนยิง")]
+    public AudioClip shootSound;
+    [Tooltip("AudioSource สำหรับเล่นเสียง (ถ้าไม่ใส่จะเพิ่มให้อัตโนมัติ)")]
+    public AudioSource audioSource;
+
     // ──── Private References ────
     private Gun sciFiGun;          // The Developer Train Gun component
     private bool isTriggerHeld;
@@ -54,6 +60,14 @@ public class GunController : MonoBehaviour
         // ค้นหากล้อง
         if (playerCamera == null)
             playerCamera = Camera.main;
+
+        // ค้นหาหรือสร้าง AudioSource
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
+                audioSource = gameObject.AddComponent<AudioSource>();
+        }
 
         // Subscribe: ทุกครั้งที่ Sci-Fi Gun ยิงกระสุนออกมา เราจะทำ Raycast ดาเมจเอง
         // (กระสุน Sci-Fi จะทำหน้าที่เป็น Visual Tracer เท่านั้น)
@@ -113,7 +127,13 @@ public class GunController : MonoBehaviour
             playerHealth.DrainHealth(hpCostPerShot);
         }
 
-        // 2. Raycast จากกึ่งกลาง Crosshair ไปหาเป้าหมาย
+        // 2. เล่นเสียงยิง
+        if (shootSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(shootSound);
+        }
+
+        // 3. Raycast จากกึ่งกลาง Crosshair ไปหาเป้าหมาย
         PerformCrosshairHitscan();
     }
 

@@ -280,6 +280,8 @@ MonoBehaviour:
   hpCostPerShot: 2
   isAutoFire: 1
   hitEffectPrefab: {fileID: 0}
+  shootSound: {fileID: 8300000, guid: daa56e19989211b4ead6acc3723db981, type: 3}
+  audioSource: {fileID: 0}
 --- !u!1 &829233217071921064
 GameObject:
   m_ObjectHideFlags: 0
@@ -20923,7 +20925,7 @@ Transform:
   m_GameObject: {fileID: 4170611666019792750}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 225.20767, y: 0.000001616987, z: 244.13231}
+  m_LocalPosition: {x: 18, y: 0, z: -20}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -21306,11 +21308,11 @@ MonoBehaviour:
   parryHitstopTimeScale: 0.02
   parryHitstopDuration: 0.3
   hpCostPerPunch: 0
-  punchHitVFX: {fileID: 0}
-  parryVFX: {fileID: 0}
+  punchHitVFX: {fileID: 421222098303511172, guid: 6f76fcb3b9a82e641858d9bc1c2953cb, type: 3}
+  parryVFX: {fileID: 1518374185789279940, guid: 81d986ee92af7554e9d31421e0c50a0f, type: 3}
   punchSwingSFX: {fileID: 0}
-  punchHitSFX: {fileID: 0}
-  parrySFX: {fileID: 0}
+  punchHitSFX: {fileID: 8300000, guid: 7ff23df43687c9f49b834f8ddfe6921d, type: 3}
+  parrySFX: {fileID: 8300000, guid: 7ff23df43687c9f49b834f8ddfe6921d, type: 3}
 --- !u!1 &4553962798935555518
 GameObject:
   m_ObjectHideFlags: 0
@@ -31631,8 +31633,10 @@ MonoBehaviour:
   beamPrefab: {fileID: 6154995089280665462, guid: b210611948cda5248b4bd24e0c86fb0f, type: 3}
   beamLifetime: 2
   beamScale: 1
-  hitEffectPrefab: {fileID: 0}
+  hitEffectPrefab: {fileID: 4794043405585894037, guid: 253a6430fa6e3f349a8e81ea0ac85e55, type: 3}
   muzzlePoint: {fileID: 9222754885101148123}
+  shootSound: {fileID: 8300000, guid: c069d34968e79bd4d8ff69e06b1dca29, type: 3}
+  audioSource: {fileID: 0}
 --- !u!1 &6336650404821266031
 GameObject:
   m_ObjectHideFlags: 0
@@ -31721,6 +31725,8 @@ MonoBehaviour:
   hpCostPerShot: 2
   isAutoFire: 0
   hitEffectPrefab: {fileID: 0}
+  shootSound: {fileID: 8300000, guid: f32ab78afa40205468335b05bff2958f, type: 3}
+  audioSource: {fileID: 0}
 --- !u!1 &6456551376289780481
 GameObject:
   m_ObjectHideFlags: 0
