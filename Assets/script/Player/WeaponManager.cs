@@ -38,11 +38,18 @@ public class WeaponManager : MonoBehaviour
     // ─────────────────────────────────────────────────────────
     void Start()
     {
+        // ซ่อนทุกอย่างไว้ก่อน (ยกเว้นมือเปล่า/หมัด ถ้ามีสคริปต์แยก)
         SetWeapon(noobGun,     false);
         SetWeapon(sciFiPistol, false);
         SetWeapon(sciFiSMG,    false);
         SetWeapon(railgun,     false);
-        // Player เริ่มด้วยมือเปล่า (ไม่มีปืน) จนกว่าจะเก็บ Pickup ได้
+
+        // ให้ NoobGun เป็นปืนเริ่มต้น (ถ้าต้องการให้ผู้เล่นมีปืนตั้งแต่เริ่ม)
+        if (noobGun != null)
+        {
+            EquipNoobGun();
+            Debug.Log("[WeaponManager] 🏁 เริ่มเกม: ได้รับ NoobGun เป็นอาวุธเริ่มต้น");
+        }
     }
 
     // ─────────────────────────────────────────────────────────

@@ -31,6 +31,9 @@ public class EnemyProjectile : MonoBehaviour
         HandleHit(other.gameObject);
     }
 
+    [Header("Parry Logic")]
+    public string enemyLayerName = "Enemy";
+
     private void HandleHit(GameObject hitObject)
     {
         // ───── ถ้าถูก Parry แล้ว → ทำดาเมจ Enemy แทน ─────
@@ -39,29 +42,40 @@ public class EnemyProjectile : MonoBehaviour
             // ข้าม Player (ไม่ทำดาเมจตัวเอง)
             if (hitObject.CompareTag("Player")) return;
 
+            // เช็คว่าอยู่ใน Layer ศัตรูหรือไม่ (ตามที่ USER ต้องการ)
+            bool hitEnemyLayer = hitObject.layer == LayerMask.NameToLayer(enemyLayerName);
+
             EnemyHealth enemyHealth = hitObject.GetComponentInParent<EnemyHealth>();
-            if (enemyHealth != null)
-            {
-                enemyHealth.TakeDamage(damage);
-                Debug.Log($"[Parried Projectile] ⚡ โดน {hitObject.name} → {damage} DMG");
-                Destroy(gameObject);
-                return;
-            }
-
-            // Fallback: EnemyHP
             EnemyHP oldHP = hitObject.GetComponentInParent<EnemyHP>();
-            if (oldHP != null)
+
+            // ถ้าโดน Layer ศัตรู หรือมีสคริปต์เลือด ให้ทำดาเมจและทำลายตัวเอง
+            if (hitEnemyLayer || enemyHealth != null || oldHP != null)
             {
-                oldHP.TakeDamage((float)damage);
-                Debug.Log($"[Parried Projectile] ⚡ โดน {hitObject.name} → {damage} DMG (EnemyHP)");
+                if (enemyHealth != null)
+                {
+                    enemyHealth.TakeDamage(damage);
+                    Debug.Log($"[Parried Projectile] ⚡ โดน {hitObject.name} (EnemyHealth) → {damage} DMG");
+                }
+                else if (oldHP != null)
+                {
+                    oldHP.TakeDamage((float)damage);
+                    Debug.Log($"[Parried Projectile] ⚡ โดน {hitObject.name} (EnemyHP) → {damage} DMG");
+                }
+                else
+                {
+                    Debug.Log($"[Parried Projectile] ⚡ โดน {hitObject.name} (Enemy Layer เท่านั้น)");
+                }
+
                 Destroy(gameObject);
                 return;
             }
-
 
             // ถ้าชนอะไรอย่างอื่น (กำแพง, พื้น) ให้ทำลายทิ้งด้วย
-            Debug.Log($"[Parried Projectile] 💥 ชน {hitObject.name} (กำแพง/พื้น) และสลายไป");
-            Destroy(gameObject);
+            if (!hitObject.CompareTag("Player"))
+            {
+                Debug.Log($"[Parried Projectile] 💥 ชนสิ่งกีดขวาง {hitObject.name} (Tag: {hitObject.tag}) และสลายไป");
+                Destroy(gameObject);
+            }
             return;
         }
 

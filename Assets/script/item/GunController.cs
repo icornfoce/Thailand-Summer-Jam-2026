@@ -38,8 +38,6 @@ public class GunController : MonoBehaviour
     private bool isTriggerHeld;
 
     // ──── State ────
-    private bool isWaitingForNextShot = false;
-    private float shotTimer = 0f;
 
     void Start()
     {

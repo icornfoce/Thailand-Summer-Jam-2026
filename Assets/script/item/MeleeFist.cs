@@ -234,14 +234,23 @@ public class MeleeFist : MonoBehaviour
             {
                 rb.isKinematic = false;
                 Vector3 reflectDir = playerCamera.transform.forward;
+
+                // ย้ายกระสุนไปข้างหน้าเล็กน้อยเพื่อไม่ให้ชนตัวผู้เล่นหรือกล้องทันที
+                projectile.transform.position += reflectDir * 1.5f;
+                
+                // ตั้งความเร็ว
                 rb.linearVelocity = reflectDir * reflectSpeed;
                 projectile.transform.rotation = Quaternion.LookRotation(reflectDir);
+
+                // เปลี่ยน Layer ให้เป็น Default (Layer 0) เพื่อให้แน่ใจว่ามันจะชนกับศัตรูได้
+                // (ปกติกระสุนศัตรูอาจจะถูกตั้ง Layer ที่ไม่ให้ชนกับศัตรูด้วยกันเอง)
+                projectile.gameObject.layer = 0; 
             }
 
             projectile.isParried = true;
             projectile.damage *= 2;
 
-            Debug.Log($"[MeleeFist] 👊 PUNCHED BACK!");
+            Debug.Log($"[MeleeFist] 👊 PUNCHED BACK! (Layer set to Default, moved forward)");
 
             // แถม Hitstop แบบ Slow สั้นๆ หลังดีดออกไปเพื่อความสะใจ
             TriggerHitstop(parryHitstopTimeScale, parryHitstopDuration);
