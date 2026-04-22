@@ -52,12 +52,16 @@ public class EnemyProjectile : MonoBehaviour
             EnemyHP oldHP = hitObject.GetComponentInParent<EnemyHP>();
             if (oldHP != null)
             {
-                oldHP.TakeDamage(damage);
+                oldHP.TakeDamage((float)damage);
                 Debug.Log($"[Parried Projectile] ⚡ โดน {hitObject.name} → {damage} DMG (EnemyHP)");
                 Destroy(gameObject);
                 return;
             }
 
+
+            // ถ้าชนอะไรอย่างอื่น (กำแพง, พื้น) ให้ทำลายทิ้งด้วย
+            Debug.Log($"[Parried Projectile] 💥 ชน {hitObject.name} (กำแพง/พื้น) และสลายไป");
+            Destroy(gameObject);
             return;
         }
 

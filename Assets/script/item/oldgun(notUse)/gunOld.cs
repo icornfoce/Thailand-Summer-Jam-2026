@@ -216,12 +216,12 @@ public class gun : MonoBehaviour
             {
                 enemyHealth.TakeDamage(damage);
             }
-            else 
+            else
             {
-                EnemyHP oldEnemyHP = hit.collider.GetComponentInParent<EnemyHP>();
-                if (oldEnemyHP != null)
+                EnemyHP oldHP = hit.collider.GetComponentInParent<EnemyHP>();
+                if (oldHP != null)
                 {
-                    oldEnemyHP.TakeDamage(damage);
+                    oldHP.TakeDamage((float)damage);
                 }
             }
 

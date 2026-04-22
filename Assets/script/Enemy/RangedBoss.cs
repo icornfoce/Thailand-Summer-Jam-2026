@@ -9,7 +9,9 @@ public class RangedBoss : MonoBehaviour
     [Header("Movement")]
     public float walkSpeed = 3f;
     public float rotationSpeed = 360f;
-    public float maintainDistance = 10f;
+    public float beamRotationSpeed = 90f; // Slower rotation during beam
+    public float stoppingDistance = 10f;
+    public float retreatDistance = 5f;
 
     [Header("Beam Attack Settings")]
     public float chargeTime = 1.5f;
@@ -24,6 +26,8 @@ public class RangedBoss : MonoBehaviour
 
     [Header("Projectile Attack Settings (Secondary)")]
     public int attackDamage = 10;
+    public float attackRange = 15f;
+    public float fireRate = 1.5f;
     public float projectileSpeed = 15f;
     public GameObject projectilePrefab;
     public GameObject attackVfx;
@@ -36,6 +40,7 @@ public class RangedBoss : MonoBehaviour
 
     [Header("Visual Effects")]
     public LineRenderer beamRenderer;
+    public GameObject beamVfxPrefab;
     public GameObject chargeVfxPrefab;
     public GameObject beamImpactVfxPrefab;
     public Transform firePoint;
@@ -51,8 +56,10 @@ public class RangedBoss : MonoBehaviour
     private float stateTimer = 0f;
     private Vector3 currentBeamDirection;
     private GameObject currentChargeVfx;
+    private GameObject currentBeamVfx;
     private GameObject currentImpactVfx;
     private float damageAccumulator = 0f;
+    private float nextFireTime = 0f;
 
     void Start()
     {
@@ -66,7 +73,7 @@ public class RangedBoss : MonoBehaviour
         if (animator == null) animator = GetComponentInChildren<Animator>();
         
         if (beamRenderer != null) beamRenderer.enabled = false;
-        else Debug.LogError("Ranged Boss: BEAM RENDERER is not assigned in the Inspector!");
+        // Line renderer is now used internally for logic if needed, but kept invisible as requested
 
         if (firePoint == null) Debug.LogError("Ranged Boss: FIRE POINT is not assigned in the Inspector!");
 
@@ -120,32 +127,37 @@ public class RangedBoss : MonoBehaviour
             float dist = Vector3.Distance(transform.position, playerTransform.position);
             Debug.Log($"Ranged Boss Status - State: {currentState}, Distance: {dist}, BeamRange: {beamRange}");
         }
+
+        // Secondary attack can happen during Chasing and Cooldown
+        if (currentState == BossState.Chasing || currentState == BossState.Cooldown)
+        {
+            HandleSecondaryAttack();
+        }
+    }
+
+    private void HandleSecondaryAttack()
+    {
+        float distance = Vector3.Distance(transform.position, playerTransform.position);
+        if (distance <= attackRange && Time.time >= nextFireTime)
+        {
+            Shoot();
+            nextFireTime = Time.time + fireRate;
+        }
     }
 
     private void HandleChasing()
     {
-        RotateTowards(playerTransform.position, rotationSpeed);
-
+        Vector3 direction = (playerTransform.position - transform.position).normalized;
         float distance = Vector3.Distance(transform.position, playerTransform.position);
 
-        if (agent.isOnNavMesh)
-        {
-            agent.isStopped = false;
-            // Try to maintain a specific distance
-            Vector3 targetPos = playerTransform.position + (transform.position - playerTransform.position).normalized * maintainDistance;
-            agent.SetDestination(targetPos);
-        }
+        RotateTowards(playerTransform.position, rotationSpeed);
+        HandleMovement(distance, direction);
 
         if (Time.time >= stateTimer)
         {
             if (distance <= beamRange)
             {
                 StartCharging();
-            }
-            // Occasional projectile shot while chasing
-            else if (Random.value < 0.01f) // Small chance per frame
-            {
-                Shoot();
             }
         }
     }
@@ -167,26 +179,15 @@ public class RangedBoss : MonoBehaviour
             currentChargeVfx.transform.SetParent(firePoint);
         }
 
-        // Show the line as a thin preview laser
-        if (beamRenderer != null)
-        {
-            beamRenderer.enabled = true;
-            beamRenderer.startWidth = previewBeamWidth;
-            beamRenderer.endWidth = previewBeamWidth;
-        }
+        // Line renderer remains invisible
     }
 
     private void HandleCharging()
     {
-        // Face player during charge
-        RotateTowards(playerTransform.position, rotationSpeed);
+        // Face player during charge - rotate slower
+        RotateTowards(playerTransform.position, beamRotationSpeed);
 
-        // Update the preview line position
-        if (beamRenderer != null && firePoint != null)
-        {
-            beamRenderer.SetPosition(0, firePoint.position);
-            beamRenderer.SetPosition(1, playerTransform.position); // Direct aim during charge
-        }
+        if (agent.isOnNavMesh) agent.isStopped = true;
 
         if (Time.time >= stateTimer)
         {
@@ -208,12 +209,11 @@ public class RangedBoss : MonoBehaviour
 
         if (currentChargeVfx != null) Destroy(currentChargeVfx);
 
-        // Set beam to full width
-        if (beamRenderer != null)
+        // Instantiate Beam VFX
+        if (beamVfxPrefab != null && firePoint != null)
         {
-            beamRenderer.enabled = true;
-            beamRenderer.startWidth = firingBeamWidth;
-            beamRenderer.endWidth = firingBeamWidth;
+            currentBeamVfx = Instantiate(beamVfxPrefab, firePoint.position, firePoint.rotation);
+            currentBeamVfx.transform.SetParent(firePoint);
         }
 
         if (beamLoopSfx != null)
@@ -228,6 +228,11 @@ public class RangedBoss : MonoBehaviour
 
     private void HandleFiring()
     {
+        // Rotate boss slower towards player during firing
+        RotateTowards(playerTransform.position, beamRotationSpeed);
+
+        if (agent.isOnNavMesh) agent.isStopped = true;
+
         // Aim for the center of the player (assuming pivot is at feet)
         Vector3 targetDirection = ((playerTransform.position + Vector3.up) - firePoint.position).normalized;
         
@@ -236,17 +241,19 @@ public class RangedBoss : MonoBehaviour
         
         if (currentBeamDirection == Vector3.zero) currentBeamDirection = targetDirection; // Safety check
 
-        // Periodic debug for direction
-        if (Time.frameCount % 60 == 0) Debug.Log($"Beam Dir: {currentBeamDirection.ToString("F3")}, Target: {targetDirection.ToString("F3")}");
+        RaycastHit hit;
+        Vector3 endPoint = firePoint.position + currentBeamDirection * beamRange;
 
-        // Update Line Renderer
-        if (beamRenderer != null && firePoint != null)
+        // Update Beam VFX position and rotation
+        if (currentBeamVfx != null && firePoint != null)
         {
-            beamRenderer.SetPosition(0, firePoint.position);
-            
-            RaycastHit hit;
-            Vector3 endPoint = firePoint.position + currentBeamDirection * beamRange;
+            currentBeamVfx.transform.position = firePoint.position;
+            currentBeamVfx.transform.rotation = Quaternion.LookRotation(currentBeamDirection);
+        }
 
+        // Raycasting logic
+        if (firePoint != null)
+        {
             // Use LayerMask to avoid hitting the boss itself
             if (Physics.Raycast(firePoint.position, currentBeamDirection, out hit, beamRange, beamMask))
             {
@@ -286,7 +293,15 @@ public class RangedBoss : MonoBehaviour
                 if (currentImpactVfx != null) Destroy(currentImpactVfx);
             }
 
-            beamRenderer.SetPosition(1, endPoint);
+            // Update Beam VFX scale to reach the hit point
+            if (currentBeamVfx != null)
+            {
+                float distance = Vector3.Distance(firePoint.position, endPoint);
+                // Adjust scale based on your VFX prefab's orientation (usually Z)
+                Vector3 scale = currentBeamVfx.transform.localScale;
+                scale.z = distance; 
+                currentBeamVfx.transform.localScale = scale;
+            }
         }
 
         if (Time.time >= stateTimer)
@@ -303,18 +318,43 @@ public class RangedBoss : MonoBehaviour
 
         if (animator != null) animator.SetBool(firingBool, false);
         if (beamRenderer != null) beamRenderer.enabled = false;
+        if (currentBeamVfx != null) Destroy(currentBeamVfx);
         if (beamAudioSource.isPlaying) beamAudioSource.Stop();
         if (currentImpactVfx != null) Destroy(currentImpactVfx);
     }
 
     private void HandleCooldown()
     {
+        Vector3 direction = (playerTransform.position - transform.position).normalized;
+        float distance = Vector3.Distance(transform.position, playerTransform.position);
+
         RotateTowards(playerTransform.position, rotationSpeed);
-        if (agent.isOnNavMesh) agent.isStopped = false;
+        HandleMovement(distance, direction);
 
         if (Time.time >= stateTimer)
         {
             currentState = BossState.Chasing;
+        }
+    }
+
+    private void HandleMovement(float distance, Vector3 direction)
+    {
+        if (!agent.isOnNavMesh) return;
+
+        if (distance > stoppingDistance)
+        {
+            agent.isStopped = false;
+            agent.SetDestination(playerTransform.position);
+        }
+        else if (distance < retreatDistance)
+        {
+            agent.isStopped = false;
+            Vector3 retreatPosition = transform.position - direction * retreatDistance;
+            agent.SetDestination(retreatPosition);
+        }
+        else
+        {
+            agent.isStopped = true;
         }
     }
 

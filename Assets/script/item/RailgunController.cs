@@ -153,11 +153,10 @@ public class RailgunController : MonoBehaviour
             }
             else
             {
-                // Fallback: EnemyHP (สคริปต์เก่า)
                 EnemyHP oldHP = hit.collider.GetComponentInParent<EnemyHP>();
                 if (oldHP != null)
                 {
-                    oldHP.TakeDamage(damage);
+                    oldHP.TakeDamage((float)damage);
                     Debug.Log($"[Railgun] ⚡ ทะลุโดน {hit.collider.name} → {damage} DMG (EnemyHP)");
                 }
             }

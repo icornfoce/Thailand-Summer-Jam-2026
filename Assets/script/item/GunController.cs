@@ -139,11 +139,10 @@ public class GunController : MonoBehaviour
             }
             else
             {
-                // ─ ลอง EnemyHP สคริปต์เก่า (fallback) ─
                 EnemyHP oldHP = hit.collider.GetComponentInParent<EnemyHP>();
                 if (oldHP != null)
                 {
-                    oldHP.TakeDamage(damage);
+                    oldHP.TakeDamage((float)damage);
                 }
             }
 

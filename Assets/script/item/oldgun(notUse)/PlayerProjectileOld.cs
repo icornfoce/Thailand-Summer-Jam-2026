@@ -43,10 +43,10 @@ public class PlayerProjectile : MonoBehaviour
         }
         else
         {
-            EnemyHP oldEnemyHP = hitObject.GetComponentInParent<EnemyHP>();
-            if (oldEnemyHP != null)
+            EnemyHP oldHP = hitObject.GetComponentInParent<EnemyHP>();
+            if (oldHP != null)
             {
-                oldEnemyHP.TakeDamage(damage);
+                oldHP.TakeDamage((float)damage);
             }
         }
 

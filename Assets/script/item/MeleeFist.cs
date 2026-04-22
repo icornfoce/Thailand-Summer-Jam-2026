@@ -42,8 +42,10 @@ public class MeleeFist : MonoBehaviour
     [Header("=== Parry Settings ===")]
     [Tooltip("ความเร็วกระสุนที่เด้งกลับ")]
     public float reflectSpeed = 40f;
+    [Tooltip("ระยะเวลาที่เกมจะหยุดสนิ่งตอน Parry (วินาทีจริง)")]
+    public float parryFreezeDuration = 0.15f;
     [Tooltip("Time Scale ตอน Parry (0.01 = ช้ามากเท่ๆ)")]
-    public float parryHitstopTimeScale = 0.02f;
+    public float parryHitstopTimeScale = 0.05f;
     [Tooltip("ระยะเวลา Slow ตอน Parry (วินาทีจริง)")]
     public float parryHitstopDuration = 0.3f;
 
@@ -154,8 +156,9 @@ public class MeleeFist : MonoBehaviour
             if (hit.collider.CompareTag("Player")) continue;
 
             // ───── เช็ค EnemyProjectile ก่อน (Parry) ─────
-            EnemyProjectile projectile = hit.collider.GetComponent<EnemyProjectile>();
-            if (projectile != null)
+            // ใช้ GetComponentInParent เผื่อสคริปต์อยู่คนละชั้นกับ Collider
+            EnemyProjectile projectile = hit.collider.GetComponentInParent<EnemyProjectile>();
+            if (projectile != null && !projectile.isParried)
             {
                 ParryProjectile(projectile, hit.point);
                 hitSomething = true;
@@ -174,18 +177,19 @@ public class MeleeFist : MonoBehaviour
                 hitSomething = true;
                 continue;
             }
-
-            // Fallback: EnemyHP
-            EnemyHP oldHP = hit.collider.GetComponentInParent<EnemyHP>();
-            if (oldHP != null)
+            else
             {
-                oldHP.TakeDamage(damage);
-                Debug.Log($"[MeleeFist] 👊 ต่อยโดน {hit.collider.name} → {damage} DMG (EnemyHP)");
-                SpawnVFX(punchHitVFX, hit.point, hit.normal);
-                PlaySFX(punchHitSFX);
-                TriggerHitstop(hitstopTimeScale, hitstopDuration);
-                hitSomething = true;
-                continue;
+                EnemyHP oldHP = hit.collider.GetComponentInParent<EnemyHP>();
+                if (oldHP != null)
+                {
+                    oldHP.TakeDamage((float)damage);
+                    Debug.Log($"[MeleeFist] 👊 ต่อยโดน {hit.collider.name} → {damage} DMG (EnemyHP)");
+                    SpawnVFX(punchHitVFX, hit.point, hit.normal);
+                    PlaySFX(punchHitSFX);
+                    TriggerHitstop(hitstopTimeScale, hitstopDuration);
+                    hitSomething = true;
+                    continue;
+                }
             }
         }
 
@@ -198,28 +202,50 @@ public class MeleeFist : MonoBehaviour
     // ─────────────────────────────────────────────────────────
     private void ParryProjectile(EnemyProjectile projectile, Vector3 hitPoint)
     {
-        Debug.Log($"[MeleeFist] ✨ PARRY! กระเด่ง {projectile.name} กลับไป!");
+        StartCoroutine(ParryRoutine(projectile, hitPoint));
+    }
 
-        // เล่น VFX
-        SpawnVFX(parryVFX, hitPoint, Vector3.up);
+    private IEnumerator ParryRoutine(EnemyProjectile projectile, Vector3 hitPoint)
+    {
+        Debug.Log($"[MeleeFist] ✨ PARRY! Freezing game...");
 
-        // กลับทิศ Projectile
+        // 1. หยุดกระสุนไว้ชั่วคราว
         Rigidbody rb = projectile.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            // หันกลับไปทิศตรงข้าม + เล็งไปข้างหน้ากล้อง
-            Vector3 reflectDir = playerCamera.transform.forward;
-            rb.linearVelocity = reflectDir * reflectSpeed;
+            rb.linearVelocity = Vector3.zero;
+            rb.isKinematic = true; // ล็อคตำแหน่งไว้
         }
 
-        // ตั้งค่าให้ Projectile ทำดาเมจ Enemy แทน Player
-        projectile.isParried = true;
-
-        // เล่นเสียง Parry
+        // เล่น VFX/SFX ทันทีที่กระทบ
+        SpawnVFX(parryVFX, hitPoint, Vector3.up);
         PlaySFX(parrySFX);
 
-        // Hitstop แบบ Parry (ช้ากว่า/นานกว่า)
-        TriggerHitstop(parryHitstopTimeScale, parryHitstopDuration);
+        // หยุดเวลาทั้งเกม (TimeScale = 0)
+        TriggerHitstop(0f, parryFreezeDuration);
+
+        // รอจนกว่าเวลาหยุดจะหมด (ใช้ Realtime เพราะ TimeScale เป็น 0)
+        yield return new WaitForSecondsRealtime(parryFreezeDuration);
+
+        // 2. ดีดกลับ!
+        if (projectile != null)
+        {
+            if (rb != null)
+            {
+                rb.isKinematic = false;
+                Vector3 reflectDir = playerCamera.transform.forward;
+                rb.linearVelocity = reflectDir * reflectSpeed;
+                projectile.transform.rotation = Quaternion.LookRotation(reflectDir);
+            }
+
+            projectile.isParried = true;
+            projectile.damage *= 2;
+
+            Debug.Log($"[MeleeFist] 👊 PUNCHED BACK!");
+
+            // แถม Hitstop แบบ Slow สั้นๆ หลังดีดออกไปเพื่อความสะใจ
+            TriggerHitstop(parryHitstopTimeScale, parryHitstopDuration);
+        }
     }
 
     // ─────────────────────────────────────────────────────────
