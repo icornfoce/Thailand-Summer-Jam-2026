@@ -1648,11 +1648,11 @@ MonoBehaviour:
   waitToClearEnemies: 1
   bonusHealthPerWave: 10
   enemyPrefabs:
-  - {fileID: 3902662632487597997, guid: 4ade6edbb51abad43866614ca56d7f77, type: 3}
-  - {fileID: 4573300050744233589, guid: e8ce034018e59bb41922f1af495f214c, type: 3}
+  - {fileID: 7214263021171853590, guid: b1cfbced81bf988498ff39c7fb50ca7f, type: 3}
+  - {fileID: 8790308463290523451, guid: 8b68016c7812835438d1b7e782afa8f3, type: 3}
   bossPrefabs:
-  - {fileID: 5985651379115596812, guid: 2327abc5757913746bbe4c36f5c6428b, type: 3}
-  - {fileID: 1320522589035034590, guid: 4a9e051b703fa2141b5475f262c24e93, type: 3}
+  - {fileID: 6283615738046828132, guid: 8d98dea4271f4c6409ea85ddc0288532, type: 3}
+  - {fileID: 5726197547483791521, guid: aef20a8f3bc122441918beb37389d842, type: 3}
   bossWaveInterval: 10
   bossIncreasePerBossWave: 1
   spawnPoints:
@@ -1726,63 +1726,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &975473699
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1320522589035034590, guid: 4a9e051b703fa2141b5475f262c24e93, type: 3}
-      propertyPath: m_Name
-      value: RangedBoss
-      objectReference: {fileID: 0}
-    - target: {fileID: 5105113518030477753, guid: 4a9e051b703fa2141b5475f262c24e93, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 18.274757
-      objectReference: {fileID: 0}
-    - target: {fileID: 5105113518030477753, guid: 4a9e051b703fa2141b5475f262c24e93, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.1233798
-      objectReference: {fileID: 0}
-    - target: {fileID: 5105113518030477753, guid: 4a9e051b703fa2141b5475f262c24e93, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 11.735748
-      objectReference: {fileID: 0}
-    - target: {fileID: 5105113518030477753, guid: 4a9e051b703fa2141b5475f262c24e93, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.12258562
-      objectReference: {fileID: 0}
-    - target: {fileID: 5105113518030477753, guid: 4a9e051b703fa2141b5475f262c24e93, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5105113518030477753, guid: 4a9e051b703fa2141b5475f262c24e93, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0.992458
-      objectReference: {fileID: 0}
-    - target: {fileID: 5105113518030477753, guid: 4a9e051b703fa2141b5475f262c24e93, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5105113518030477753, guid: 4a9e051b703fa2141b5475f262c24e93, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5105113518030477753, guid: 4a9e051b703fa2141b5475f262c24e93, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: -165.917
-      objectReference: {fileID: 0}
-    - target: {fileID: 5105113518030477753, guid: 4a9e051b703fa2141b5475f262c24e93, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 4a9e051b703fa2141b5475f262c24e93, type: 3}
 --- !u!43 &996629886
 Mesh:
   m_ObjectHideFlags: 0
@@ -4210,4 +4153,3 @@ SceneRoots:
   - {fileID: 885133690}
   - {fileID: 1846577488}
   - {fileID: 1132981471}
-  - {fileID: 975473699}

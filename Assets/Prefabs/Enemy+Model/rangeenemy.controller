@@ -40,7 +40,7 @@ AnimatorStateMachine:
     m_Position: {x: 440, y: 170, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 7910628870487043024}
-    m_Position: {x: 470, y: 110, z: 0}
+    m_Position: {x: 440, y: 90, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1792522526460339357}
     m_Position: {x: 500, y: -10, z: 0}
@@ -123,7 +123,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: throw
-  m_Speed: 1
+  m_Speed: 2
   m_CycleOffset: 0
   m_Transitions: []
   m_StateMachineBehaviours: []
