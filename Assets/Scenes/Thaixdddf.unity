@@ -395,7 +395,7 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 910177ec26b76c14996c2d53627a6def, type: 3}
---- !u!1001 &937480168
+--- !u!1001 &1098674994
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -407,17 +407,25 @@ PrefabInstance:
       propertyPath: m_Name
       value: balck_titan
       objectReference: {fileID: 0}
+    - target: {fileID: 3591431814997772597, guid: 9c2715701d0bc1649a1fc34039829c25, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.044
+      objectReference: {fileID: 0}
+    - target: {fileID: 3591431814997772597, guid: 9c2715701d0bc1649a1fc34039829c25, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.663
+      objectReference: {fileID: 0}
     - target: {fileID: 4249681057300626729, guid: 9c2715701d0bc1649a1fc34039829c25, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.1425598
+      value: -2.6123157
       objectReference: {fileID: 0}
     - target: {fileID: 4249681057300626729, guid: 9c2715701d0bc1649a1fc34039829c25, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.71034557
+      value: 0.71034545
       objectReference: {fileID: 0}
     - target: {fileID: 4249681057300626729, guid: 9c2715701d0bc1649a1fc34039829c25, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 8.917405
+      value: 7.479255
       objectReference: {fileID: 0}
     - target: {fileID: 4249681057300626729, guid: 9c2715701d0bc1649a1fc34039829c25, type: 3}
       propertyPath: m_LocalRotation.w
@@ -450,7 +458,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3580984901361231763, guid: 9c2715701d0bc1649a1fc34039829c25, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1322308519}
   m_SourcePrefab: {fileID: 100100000, guid: 9c2715701d0bc1649a1fc34039829c25, type: 3}
 --- !u!1001 &1103711292
 PrefabInstance:
@@ -509,6 +520,33 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c98043d57e0190845b790d7b92990bee, type: 3}
+--- !u!1 &1322308518 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3580984901361231763, guid: 9c2715701d0bc1649a1fc34039829c25, type: 3}
+  m_PrefabInstance: {fileID: 1098674994}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &1322308519
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1322308518}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: d56236e06b272aa40b80f4b40704e893, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &1458936800
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -623,6 +661,64 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e47c3fe9269727742b186b0184a90e6d, type: 3}
+--- !u!1001 &1667342626
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 59696787c3ee4c44e860615c62e5d88b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.9266864
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59696787c3ee4c44e860615c62e5d88b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.00000006719014
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59696787c3ee4c44e860615c62e5d88b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 7.140681
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59696787c3ee4c44e860615c62e5d88b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59696787c3ee4c44e860615c62e5d88b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59696787c3ee4c44e860615c62e5d88b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59696787c3ee4c44e860615c62e5d88b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59696787c3ee4c44e860615c62e5d88b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59696787c3ee4c44e860615c62e5d88b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 59696787c3ee4c44e860615c62e5d88b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 59696787c3ee4c44e860615c62e5d88b, type: 3}
+      propertyPath: m_Name
+      value: Stable Sword Inward Slash
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects:
+    - {fileID: 5937122167419501744, guid: 59696787c3ee4c44e860615c62e5d88b, type: 3}
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 59696787c3ee4c44e860615c62e5d88b, type: 3}
 --- !u!1001 &1676752432
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -691,4 +787,5 @@ SceneRoots:
   - {fileID: 1103711292}
   - {fileID: 1676752432}
   - {fileID: 795204533}
-  - {fileID: 937480168}
+  - {fileID: 1098674994}
+  - {fileID: 1667342626}
