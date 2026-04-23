@@ -536,22 +536,35 @@ public class PlayerMovement : MonoBehaviour
     {
         if (fx == null) return;
 
-        ParticleSystem ps = fx.GetComponent<ParticleSystem>();
-        if (ps != null)
+        // วงเล็บ (true) ตรงนี้โคตรสำคัญ! เพื่อให้มันหา Particle ที่โดนซ่อน/ปิดตาไว้อยู่จนเจอ
+        ParticleSystem[] pss = fx.GetComponentsInChildren<ParticleSystem>(true);
+        
+        if (pss.Length > 0)
         {
-            // ถ้าเป็น Particle System ให้ใช้ Play/Stop เพื่อให้ Effect ไม่กระตุกเวลาปิด
-            if (isActive)
+            if (isActive && !fx.activeSelf) 
             {
-                if (!ps.isPlaying) ps.Play();
+                // เปิดการมองเห็นของ Object หลัก
+                fx.SetActive(true);
             }
-            else
+
+            foreach (var ps in pss)
             {
-                if (ps.isPlaying) ps.Stop();
+                if (isActive)
+                {
+                    if (!ps.isPlaying) 
+                    {
+                        Debug.Log("🎯 กำลังสั่งยิง Effect: " + ps.gameObject.name);
+                        ps.Play(true);
+                    }
+                }
+                else
+                {
+                    if (ps.isPlaying) ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+                }
             }
         }
         else
         {
-            // ถ้าเป็น GameObject ทั่วไป (เช่น UI) ให้เปิด/ปิดตามปกติ
             if (fx.activeSelf != isActive)
             {
                 fx.SetActive(isActive);
