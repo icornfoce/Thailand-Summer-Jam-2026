@@ -107,12 +107,40 @@ public class GunController : MonoBehaviour
 
         if (isTriggerHeld)
         {
+            // หมุนกระบอกปืน (หรือเฉพาะตัวปล่อยกระสุน) ให้เล็งไปที่จุดเดียวกับเป้า Crosshair ก่อนยิง
+            AlignGunWithCrosshair();
+
             // เติมกระสุนให้เต็มก่อนยิงทุกครั้ง เพื่อไม่ให้ระบบ reload ของ Sci-Fi Gun ทำงาน
             sciFiGun.currentBulletCount = sciFiGun.stats.magazineSize;
 
             // ส่งสัญญาณให้ Sci-Fi Gun ยิง (มันจะจัดการ cooldown, burst, particle ในตัวเอง)
             sciFiGun.Shoot();
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  ALIGN GUN WITH CROSSHAIR
+    //  ปรับทิศทางของปืนให้หันไปหาเป้าหมายกึ่งกลางจอภาพเสมอ
+    // ─────────────────────────────────────────────────────────────────────────
+    private void AlignGunWithCrosshair()
+    {
+        if (playerCamera == null) return;
+
+        Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+        Vector3 targetPoint;
+
+        // ถ้ายิงโดนในระยะ ให้เล็งเป้าตรงพื้นผิว ถ้ายิงไม่โดนให้พุ่งไปสุดระยะสายตา
+        if (Physics.Raycast(ray, out RaycastHit hit, range))
+        {
+            targetPoint = hit.point;
+        }
+        else
+        {
+            targetPoint = ray.GetPoint(range);
+        }
+
+        // หันหน้าปืนไปหาจุดนั้น (หากปืนมีโมเดลย่อย ให้ดึง transform ย่อยมาหมุนแทน transform นี้เพื่อไม่ให้กล้องเบี้ยว)
+        transform.LookAt(targetPoint);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
