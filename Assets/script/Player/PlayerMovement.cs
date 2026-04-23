@@ -501,10 +501,34 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleScreenEffectsVisibility()
     {
-        if (speedBurstEffect != null) 
-            speedBurstEffect.SetActive(isDashing || isSliding);
-        
-        if (wallRunEffect != null)
-            wallRunEffect.SetActive(isWallRunning);
+        ToggleEffect(speedBurstEffect, isDashing || isSliding);
+        ToggleEffect(wallRunEffect, isWallRunning);
+    }
+
+    void ToggleEffect(GameObject fx, bool isActive)
+    {
+        if (fx == null) return;
+
+        ParticleSystem ps = fx.GetComponent<ParticleSystem>();
+        if (ps != null)
+        {
+            // ถ้าเป็น Particle System ให้ใช้ Play/Stop เพื่อให้ Effect ไม่กระตุกเวลาปิด
+            if (isActive)
+            {
+                if (!ps.isPlaying) ps.Play();
+            }
+            else
+            {
+                if (ps.isPlaying) ps.Stop();
+            }
+        }
+        else
+        {
+            // ถ้าเป็น GameObject ทั่วไป (เช่น UI) ให้เปิด/ปิดตามปกติ
+            if (fx.activeSelf != isActive)
+            {
+                fx.SetActive(isActive);
+            }
+        }
     }
 }

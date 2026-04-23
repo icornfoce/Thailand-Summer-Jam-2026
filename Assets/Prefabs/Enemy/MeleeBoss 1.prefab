@@ -299,7 +299,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
   maxHealth: 200
   healAmountOnDeath: 100
-  deathSfx: {fileID: 0}
+  deathSfx: {fileID: 8300000, guid: daa56e19989211b4ead6acc3723db981, type: 3}
   deathVfxPrefabs:
   - {fileID: 9219224891226368304, guid: 041ebb84f2cc12243945f4af1ea807a4, type: 3}
   - {fileID: 5584110830163523526, guid: 13ceee0397dd46e47847136ad9e4a930, type: 3}
@@ -323,7 +323,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7aa8fb2fc6eee642b82c6ffaa7f6a2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossDrop
-  itemPrefab: {fileID: 884978925183725488, guid: 4def79acc67de094eb1638ee1614ce8e, type: 3}
+  itemPrefab: {fileID: 3309940812212910387, guid: 4def79acc67de094eb1638ee1614ce8e, type: 3}
   dropHeightOffset: 0.1
   canDrop: 1
 --- !u!114 &2647372617675387694

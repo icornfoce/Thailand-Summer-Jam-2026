@@ -210,7 +210,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
   maxHealth: 30
   healAmountOnDeath: 30
-  deathSfx: {fileID: 0}
+  deathSfx: {fileID: 8300000, guid: cdb4011c13548c3408dea6112f2a2327, type: 3}
   deathVfxPrefabs:
   - {fileID: 9219224891226368304, guid: 041ebb84f2cc12243945f4af1ea807a4, type: 3}
   - {fileID: 5584110830163523526, guid: 13ceee0397dd46e47847136ad9e4a930, type: 3}
