@@ -24,6 +24,7 @@ public class MeleeBoss : MonoBehaviour
     public string chargingBool = "isCharging";
     public string dashingBool = "isDashing";
     public string attackTrigger = "Attack";
+    public string runAnimationBool = "isRunning";
 
     [Header("Audio & Visuals")]
     public GameObject chargeVfxPrefab;
@@ -101,6 +102,13 @@ public class MeleeBoss : MonoBehaviour
             case BossState.Cooldown:
                 HandleCooldown();
                 break;
+        }
+
+        // Update Animation
+        if (animator != null)
+        {
+            bool isMoving = agent.velocity.magnitude > 0.1f && !agent.isStopped;
+            animator.SetBool(runAnimationBool, isMoving);
         }
     }
 

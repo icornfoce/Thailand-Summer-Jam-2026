@@ -37,6 +37,8 @@ public class RangedBoss : MonoBehaviour
     public Animator animator;
     public string chargingBool = "isCharging";
     public string firingBool = "isFiring";
+    public string runAnimationBool = "isRunning";
+    public string attackTrigger = "Attack";
 
     [Header("Visual Effects")]
     public LineRenderer beamRenderer;
@@ -119,6 +121,13 @@ public class RangedBoss : MonoBehaviour
             case BossState.Cooldown:
                 HandleCooldown();
                 break;
+        }
+
+        // Update Animation
+        if (animator != null)
+        {
+            bool isMoving = agent.velocity.magnitude > 0.1f && !agent.isStopped;
+            animator.SetBool(runAnimationBool, isMoving);
         }
 
         // Periodic debug log (every 2 seconds) to see what's happening
@@ -385,6 +394,11 @@ public class RangedBoss : MonoBehaviour
         if (attackVfx != null && firePoint != null)
         {
             Instantiate(attackVfx, firePoint.position, firePoint.rotation);
+        }
+
+        if (animator != null)
+        {
+            animator.SetTrigger(attackTrigger);
         }
 
         // Spawn the projectile at the fire point

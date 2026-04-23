@@ -23,6 +23,11 @@ public class RangedEnemy : MonoBehaviour
     public AudioClip attackSfx;
     public GameObject attackVfx;
     
+    [Header("Animation")]
+    public Animator animator;
+    public string runAnimationBool = "isRunning";
+    public string attackTrigger = "Attack";
+    
     private float nextFireTime = 0f;
     private Transform playerTransform;
     private NavMeshAgent agent;
@@ -42,6 +47,11 @@ public class RangedEnemy : MonoBehaviour
         else
         {
             Debug.LogWarning("Player not found! Make sure the player object has the 'Player' tag.");
+        }
+
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
         }
     }
 
@@ -113,6 +123,13 @@ public class RangedEnemy : MonoBehaviour
                 Shoot();
                 nextFireTime = Time.time + fireRate;
             }
+
+            // Update Animation
+            if (animator != null)
+            {
+                bool isMoving = agent.velocity.magnitude > 0.1f && !agent.isStopped;
+                animator.SetBool(runAnimationBool, isMoving);
+            }
         }
     }
 
@@ -132,6 +149,11 @@ public class RangedEnemy : MonoBehaviour
         if (attackVfx != null && firePoint != null)
         {
             Instantiate(attackVfx, firePoint.position, firePoint.rotation);
+        }
+
+        if (animator != null)
+        {
+            animator.SetTrigger(attackTrigger);
         }
 
         // Spawn the projectile at the fire point

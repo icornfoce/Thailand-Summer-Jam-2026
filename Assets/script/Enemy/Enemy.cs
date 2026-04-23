@@ -22,6 +22,11 @@ public class Enemy : MonoBehaviour
     public AudioClip attackSfx;
     public GameObject attackVfx;
 
+    [Header("Animation")]
+    public Animator animator;
+    public string runAnimationBool = "isRunning";
+    public string attackTrigger = "Attack";
+
     private Transform playerTransform;
     private NavMeshAgent agent;
     private float nextAttackTime = 0f;
@@ -41,6 +46,11 @@ public class Enemy : MonoBehaviour
         else
         {
             Debug.LogWarning("Player not found! Make sure the player object has the 'Player' tag.");
+        }
+
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
         }
     }
 
@@ -90,6 +100,13 @@ public class Enemy : MonoBehaviour
                     agent.SetDestination(playerTransform.position);
                 }
             }
+
+            // Update Animation
+            if (animator != null)
+            {
+                bool isMoving = agent.velocity.magnitude > 0.1f && !agent.isStopped;
+                animator.SetBool(runAnimationBool, isMoving);
+            }
         }
     }
 
@@ -105,6 +122,11 @@ public class Enemy : MonoBehaviour
         if (attackVfx != null && attackPoint != null)
         {
             Instantiate(attackVfx, attackPoint.position, attackPoint.rotation);
+        }
+
+        if (animator != null)
+        {
+            animator.SetTrigger(attackTrigger);
         }
 
         // We can't do the hitbox check if the attack point isn't assigned
