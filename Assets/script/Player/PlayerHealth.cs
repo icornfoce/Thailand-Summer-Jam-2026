@@ -36,10 +36,16 @@ public class PlayerHealth : MonoBehaviour
     public UnityEvent OnTakeDamage;
     public UnityEvent OnPlayerDeath;
 
+    [Header("Death UI")]
+    [Tooltip("ใส่ UI Screen ที่จะให้แสดงตอนตาย")]
+    public GameObject deathUI;
+
     void Start()
     {
         currentHealth = maxHealth;
         OnHealthChanged?.Invoke(currentHealth, maxHealth); 
+
+        if (deathUI != null) deathUI.SetActive(false);
 
         // --- ตั้งค่า Shader (ไม่ต้องตั้ง Read/Write Enabled แล้ว) ---
         if (hpFullImage != null)
@@ -130,6 +136,7 @@ public class PlayerHealth : MonoBehaviour
     private void Die()
     {
         Debug.Log("Player has died!");
+        if (deathUI != null) deathUI.SetActive(true);
         OnPlayerDeath?.Invoke(); 
     }
 
