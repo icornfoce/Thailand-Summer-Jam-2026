@@ -157,11 +157,6 @@ public class MeleeFist : MonoBehaviour
         // เล่นเสียงต่อยลมไว้ก่อน ถ้าโดนเดี๋ยวเล่นเสียงโดนทับ
         PlaySFX(punchSwingSFX);
 
-        // หน้าจอสั่นตอนต่อย
-        PlayerMovement pm = GetComponentInParent<PlayerMovement>();
-        if (pm == null) pm = FindFirstObjectByType<PlayerMovement>();
-        if (pm != null) pm.TriggerCameraShake(punchShakeMagnitude, punchShakeDuration);
-
         foreach (RaycastHit hit in hits)
         {
             if (hit.collider.CompareTag("Player")) continue;
@@ -204,8 +199,17 @@ public class MeleeFist : MonoBehaviour
             }
         }
 
-        if (!hitSomething)
+        if (hitSomething)
+        {
+            // หน้าจอสั่นตอนตีโดน
+            PlayerMovement pm = GetComponentInParent<PlayerMovement>();
+            if (pm == null) pm = FindFirstObjectByType<PlayerMovement>();
+            if (pm != null) pm.TriggerCameraShake(punchShakeMagnitude, punchShakeDuration);
+        }
+        else
+        {
             Debug.Log("[MeleeFist] 👊 ต่อยลม");
+        }
     }
 
     // ─────────────────────────────────────────────────────────
