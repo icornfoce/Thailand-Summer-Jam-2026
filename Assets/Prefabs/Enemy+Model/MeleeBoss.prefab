@@ -8,6 +8,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -9069948750319976897, guid: 5d15d9f2c62f85546a5f708cb0fbccea, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -9069948750319976897, guid: 5d15d9f2c62f85546a5f708cb0fbccea, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 55fa1d11bcde6504cb776b7685c72233, type: 2}
     - target: {fileID: -8679921383154817045, guid: 5d15d9f2c62f85546a5f708cb0fbccea, type: 3}
       propertyPath: m_LocalScale.x
       value: 2.4564881
@@ -22,15 +30,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5d15d9f2c62f85546a5f708cb0fbccea, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 328.78317
+      value: 18.066603
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5d15d9f2c62f85546a5f708cb0fbccea, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 182.6888
+      value: -1.3704001
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5d15d9f2c62f85546a5f708cb0fbccea, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -18.698484
+      value: 18.585785
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5d15d9f2c62f85546a5f708cb0fbccea, type: 3}
       propertyPath: m_LocalRotation.w
@@ -89,6 +97,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 5d15d9f2c62f85546a5f708cb0fbccea, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3131013336901266624}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 5d15d9f2c62f85546a5f708cb0fbccea, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -1847972185722227636}
   m_SourcePrefab: {fileID: 100100000, guid: 5d15d9f2c62f85546a5f708cb0fbccea, type: 3}
 --- !u!1 &6283615738046828132 stripped
 GameObject:
@@ -208,7 +219,7 @@ MonoBehaviour:
   attackTrigger: Attack
   runAnimationBool: isRunning
   chargeVfxPrefab: {fileID: 0}
-  dashVfxPrefab: {fileID: 0}
+  dashVfxPrefab: {fileID: 3006804943666409947, guid: e5432e71186944746b33d56b488f7488, type: 3}
   vfxPoint: {fileID: 0}
   chargeSfx: {fileID: 0}
   dashSfx: {fileID: 0}
@@ -216,3 +227,25 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 0
+--- !u!95 &-1847972185722227636
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6283615738046828132}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 6791afdf60d17eb4ab48b00cfaf892d2, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
