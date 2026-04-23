@@ -36,6 +36,10 @@ public class PlayerMovement : MonoBehaviour
     private float currentTilt = 0f;
     private float originalCameraLocalY;
 
+    private float shakeTimer;
+    private float currentShakeMagnitude;
+    private Vector3 shakeOffset;
+
     private CharacterController characterController;
     private Vector3 velocity;
     private bool isGrounded;
@@ -203,7 +207,24 @@ public class PlayerMovement : MonoBehaviour
         // ถ้ากำลังสไลด์ เป้าหมายคือกล้องต่ำลง ถ้ากลับปกติหรือถูกขัดจังหวะ เป้าหมายคือจุดเดิม
         float targetCameraY = isSliding ? originalCameraLocalY + cameraCrouchOffset : originalCameraLocalY;
         Vector3 camLocalPos = playerCamera.localPosition;
+        
+        // หักลบค่า Shake เก่าออกก่อนคำนวณ เพื่อไม่ให้กล้องเลื่อนตำแหน่ง (Drift)
+        camLocalPos -= shakeOffset;
+
         camLocalPos.y = Mathf.Lerp(camLocalPos.y, targetCameraY, cameraCrouchSpeed * Time.deltaTime);
+
+        // --- ระบบหน้าจอสั่น (Camera Shake) ---
+        if (shakeTimer > 0)
+        {
+            shakeTimer -= Time.deltaTime;
+            shakeOffset = UnityEngine.Random.insideUnitSphere * currentShakeMagnitude;
+        }
+        else
+        {
+            shakeOffset = Vector3.zero;
+        }
+
+        camLocalPos += shakeOffset;
         playerCamera.localPosition = camLocalPos;
     }
 
@@ -497,6 +518,12 @@ public class PlayerMovement : MonoBehaviour
         {
             movementAudioSource.PlayOneShot(clip);
         }
+    }
+
+    public void TriggerCameraShake(float magnitude, float duration)
+    {
+        currentShakeMagnitude = magnitude;
+        shakeTimer = duration;
     }
 
     void HandleScreenEffectsVisibility()

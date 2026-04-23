@@ -33,6 +33,12 @@ public class MeleeFist : MonoBehaviour
     [Tooltip("คูลดาวน์ระหว่างหมัด (วินาที)")]
     public float punchCooldown = 0.3f;
 
+    [Header("=== Camera Shake ===")]
+    [Tooltip("ความแรงการสั่นของหน้าจอตอนต่อย")]
+    public float punchShakeMagnitude = 0.15f;
+    [Tooltip("ระยะเวลาการสั่นของหน้าจอตอนต่อย")]
+    public float punchShakeDuration = 0.1f;
+
     [Header("=== Hitstop Settings ===")]
     [Tooltip("Time Scale ตอน Hitstop (0.05 = เกือบหยุด)")]
     public float hitstopTimeScale = 0.05f;
@@ -150,6 +156,11 @@ public class MeleeFist : MonoBehaviour
 
         // เล่นเสียงต่อยลมไว้ก่อน ถ้าโดนเดี๋ยวเล่นเสียงโดนทับ
         PlaySFX(punchSwingSFX);
+
+        // หน้าจอสั่นตอนต่อย
+        PlayerMovement pm = GetComponentInParent<PlayerMovement>();
+        if (pm == null) pm = FindFirstObjectByType<PlayerMovement>();
+        if (pm != null) pm.TriggerCameraShake(punchShakeMagnitude, punchShakeDuration);
 
         foreach (RaycastHit hit in hits)
         {
