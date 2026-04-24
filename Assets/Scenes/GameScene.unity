@@ -1643,7 +1643,7 @@ MonoBehaviour:
   totalWaves: 100
   initialEnemyCount: 3
   enemyIncreasePerWave: 1
-  spawnInterval: 3
+  spawnInterval: 0.5
   timeBetweenWaves: 5
   waitToClearEnemies: 1
   bonusHealthPerWave: 10
