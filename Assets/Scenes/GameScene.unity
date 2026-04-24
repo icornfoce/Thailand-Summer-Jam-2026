@@ -2320,6 +2320,30 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6006306524521339349, guid: d2cb47a4b550d644c8473e4d98e49a01, type: 3}
+      propertyPath: OnTakeDamage.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6006306524521339349, guid: d2cb47a4b550d644c8473e4d98e49a01, type: 3}
+      propertyPath: OnHealthChanged.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6006306524521339349, guid: d2cb47a4b550d644c8473e4d98e49a01, type: 3}
+      propertyPath: OnTakeDamage.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 8413709229062205004, guid: 8d14ef5eb3050f448b9900fdaaa61965, type: 3}
+    - target: {fileID: 6006306524521339349, guid: d2cb47a4b550d644c8473e4d98e49a01, type: 3}
+      propertyPath: OnHealthChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 8413709229062205004, guid: 8d14ef5eb3050f448b9900fdaaa61965, type: 3}
+    - target: {fileID: 6006306524521339349, guid: d2cb47a4b550d644c8473e4d98e49a01, type: 3}
+      propertyPath: OnTakeDamage.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6006306524521339349, guid: d2cb47a4b550d644c8473e4d98e49a01, type: 3}
+      propertyPath: OnHealthChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 7848027834366289425, guid: d2cb47a4b550d644c8473e4d98e49a01, type: 3}
       propertyPath: playerCamera
       value: 
