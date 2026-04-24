@@ -1648,7 +1648,7 @@ MonoBehaviour:
   waitToClearEnemies: 1
   bonusHealthPerWave: 10
   enemyPrefabs:
-  - {fileID: 7214263021171853590, guid: b1cfbced81bf988498ff39c7fb50ca7f, type: 3}
+  - {fileID: 3773900072223158216, guid: 1b8ec66f26719444691b83947eb9f7f9, type: 3}
   - {fileID: 8790308463290523451, guid: 8b68016c7812835438d1b7e782afa8f3, type: 3}
   bossPrefabs:
   - {fileID: 6283615738046828132, guid: 8d98dea4271f4c6409ea85ddc0288532, type: 3}
