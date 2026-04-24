@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -43,8 +45,12 @@ public class PlayerHealth : MonoBehaviour
     public UnityEvent OnPlayerDeath;
 
     [Header("Death UI")]
-    [Tooltip("ใส่ UI Screen ที่จะให้แสดงตอนตาย")]
+    [Tooltip("ใส่ UI Screen ที่จะให้แสดงตอนตาย (ไม่จำเป็นแล้วถ้ากลับ MainMenu)")]
     public GameObject deathUI;
+    [Tooltip("ชื่อ Scene ของ MainMenu")]
+    public string mainMenuSceneName = "MainMenu";
+    [Tooltip("เวลาที่รอก่อนกลับ MainMenu หลังจากล้ม")]
+    public float delayBeforeMainMenu = 2f;
 
     void Start()
     {
@@ -89,7 +95,7 @@ public class PlayerHealth : MonoBehaviour
         // 2. ระบบ Death Timer (เมื่อเลือดหมด)
         if (currentHealth <= 0 && !isDead)
         {
-            deathTimer += Time.deltaTime;
+            deathTimer += Time.unscaledDeltaTime;
             if (deathTimer >= deathDelay)
             {
                 Die();
@@ -167,9 +173,23 @@ public class PlayerHealth : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        if (deathUI != null) deathUI.SetActive(true);
         OnPlayerDeath?.Invoke(); 
+
+        // Start coroutine to load main menu
+        StartCoroutine(LoadMainMenuRoutine());
     }
+
+    private IEnumerator LoadMainMenuRoutine()
+    {
+        yield return new WaitForSeconds(delayBeforeMainMenu);
+        
+        // Reset TimeScale just in case it was paused during death
+        Time.timeScale = 1f;
+        Time.fixedDeltaTime = 0.02f;
+        
+        SceneManager.LoadScene(mainMenuSceneName);
+    }
+
 
     void OnDestroy()
     {

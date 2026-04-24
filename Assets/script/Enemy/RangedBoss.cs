@@ -231,8 +231,9 @@ public class RangedBoss : MonoBehaviour
             beamAudioSource.Play();
         }
 
-        // Initialize beam direction towards player
-        currentBeamDirection = (playerTransform.position - firePoint.position).normalized;
+        // Initialize beam direction towards the Main Camera (head height)
+        Vector3 targetPos = (Camera.main != null) ? Camera.main.transform.position : playerTransform.position + Vector3.up;
+        currentBeamDirection = (targetPos - firePoint.position).normalized;
     }
 
     private void HandleFiring()
@@ -242,8 +243,9 @@ public class RangedBoss : MonoBehaviour
 
         if (agent.isOnNavMesh) agent.isStopped = true;
 
-        // Aim for the center of the player (assuming pivot is at feet)
-        Vector3 targetDirection = ((playerTransform.position + Vector3.up) - firePoint.position).normalized;
+        // Aim for the Main Camera (head height) instead of the pivot
+        Vector3 targetPos = (Camera.main != null) ? Camera.main.transform.position : playerTransform.position + Vector3.up;
+        Vector3 targetDirection = (targetPos - firePoint.position).normalized;
         
         // "Drag" effect: Slowly slerp the current beam direction towards the target player direction
         currentBeamDirection = Vector3.Slerp(currentBeamDirection, targetDirection, beamDragSpeed * Time.deltaTime);
@@ -408,8 +410,10 @@ public class RangedBoss : MonoBehaviour
         Rigidbody projRb = projectile.GetComponent<Rigidbody>();
         if (projRb != null)
         {
-            // Use firePoint's forward which is already aiming at the (predicted) player position
-            projRb.linearVelocity = firePoint.forward * projectileSpeed;
+        // Aim the projectile at the Main Camera
+        Vector3 targetPos = (Camera.main != null) ? Camera.main.transform.position : playerTransform.position + Vector3.up;
+        firePoint.LookAt(targetPos);
+        projRb.linearVelocity = firePoint.forward * projectileSpeed;
         }
         else
         {

@@ -66,7 +66,8 @@ public class RangedEnemy : MonoBehaviour
             float distanceToPlayer = Vector3.Distance(flatEnemyPos, flatPlayerPos);
 
             // --- Predictive Tracking ---
-            Vector3 targetPosition = playerTransform.position;
+            // Target the Main Camera (head height) instead of the pivot (feet height)
+            Vector3 targetPosition = (Camera.main != null) ? Camera.main.transform.position : playerTransform.position;
             
             // Get player velocity to predict where they will be
             CharacterController playerCc = playerTransform.GetComponent<CharacterController>();
