@@ -2268,6 +2268,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2120465251435409640, guid: d2cb47a4b550d644c8473e4d98e49a01, type: 3}
+      propertyPath: m_RenderPostProcessing
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2550915804028631311, guid: d2cb47a4b550d644c8473e4d98e49a01, type: 3}
       propertyPath: wallRunEffect
       value: 
