@@ -101,6 +101,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 2889870489357150731}
   m_SourcePrefab: {fileID: 100100000, guid: 94c438338a55e8d45a5c24764491ffd8, type: 3}
+--- !u!95 &4158451411176311254 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 94c438338a55e8d45a5c24764491ffd8, type: 3}
+  m_PrefabInstance: {fileID: 7556860058045412423}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &7214263021171853590 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 94c438338a55e8d45a5c24764491ffd8, type: 3}
@@ -175,7 +180,7 @@ MonoBehaviour:
     m_Bits: 8
   attackSfx: {fileID: 0}
   attackVfx: {fileID: 0}
-  animator: {fileID: 0}
+  animator: {fileID: 4158451411176311254}
   runAnimationBool: isRunning
   attackTrigger: Attack
 --- !u!114 &2889870489357150731
