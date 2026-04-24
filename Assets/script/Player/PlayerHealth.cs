@@ -14,6 +14,12 @@ public class PlayerHealth : MonoBehaviour
     public float timePerHpDrop = 1f;
     private float decayTimer;
 
+    [Header("Death Settings")]
+    [Tooltip("Time in seconds before death after HP reaches 0")]
+    public float deathDelay = 10f;
+    private float deathTimer = 0f;
+    private bool isDead = false;
+
     [Header("UI Visual Settings (คุมแถบเลือด)")]
     public RawImage hpFullImage;
     [Tooltip("ความเร็วในการไหลลดลงของแถบเลือด (เลื่อยๆ)")]
@@ -80,7 +86,17 @@ public class PlayerHealth : MonoBehaviour
             }
         }
 
-        // 2. ระบบ UI อัปเดตแถบเลือดผ่าน Shader (เลื่อยๆ)
+        // 2. ระบบ Death Timer (เมื่อเลือดหมด)
+        if (currentHealth <= 0 && !isDead)
+        {
+            deathTimer += Time.deltaTime;
+            if (deathTimer >= deathDelay)
+            {
+                Die();
+            }
+        }
+
+        // 3. ระบบ UI อัปเดตแถบเลือดผ่าน Shader (เลื่อยๆ)
         if (fadeMaterial != null)
         {
             currentCutoff = Mathf.MoveTowards(currentCutoff, targetCutoff, smoothHPSpeed * Time.deltaTime);
@@ -103,7 +119,7 @@ public class PlayerHealth : MonoBehaviour
     {
         if (currentHealth <= 0) return;
         currentHealth -= amount;
-        if (currentHealth <= 0) { currentHealth = 0; Die(); }
+        if (currentHealth <= 0) currentHealth = 0; 
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
         UpdateTargetCutoff();
     }
@@ -113,15 +129,16 @@ public class PlayerHealth : MonoBehaviour
         if (currentHealth <= 0) return; 
         currentHealth -= amount;
         OnTakeDamage?.Invoke(); 
-        if (currentHealth <= 0) { currentHealth = 0; Die(); }
+        if (currentHealth <= 0) currentHealth = 0;
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
         UpdateTargetCutoff();
     }
 
     public void Heal(int amount)
     {
-        if (currentHealth <= 0) return; 
+        if (isDead) return; 
         currentHealth += amount;
+        if (currentHealth > 0) deathTimer = 0f; // Reset timer if healed
         if (currentHealth > maxHealth) currentHealth = maxHealth;
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
         UpdateTargetCutoff();
@@ -135,7 +152,21 @@ public class PlayerHealth : MonoBehaviour
 
     private void Die()
     {
+        if (isDead) return;
+        isDead = true;
+        
         Debug.Log("Player has died!");
+
+        // Fall without animation (Rotate 90 degrees)
+        transform.rotation = Quaternion.Euler(-90f, transform.eulerAngles.y, transform.eulerAngles.z);
+
+        // Disable movement and unlock cursor
+        PlayerMovement pm = GetComponent<PlayerMovement>();
+        if (pm != null) pm.enabled = false;
+        
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
         if (deathUI != null) deathUI.SetActive(true);
         OnPlayerDeath?.Invoke(); 
     }
