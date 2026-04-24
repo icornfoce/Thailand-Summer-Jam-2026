@@ -1653,7 +1653,7 @@ MonoBehaviour:
   bossPrefabs:
   - {fileID: 6283615738046828132, guid: 8d98dea4271f4c6409ea85ddc0288532, type: 3}
   - {fileID: 5726197547483791521, guid: aef20a8f3bc122441918beb37389d842, type: 3}
-  bossWaveInterval: 10
+  bossWaveInterval: 5
   bossIncreasePerBossWave: 1
   spawnPoints:
   - {fileID: 1507074511}
